@@ -42,11 +42,11 @@ This is a Phils-Hub community-contributed project.
 
 ## Screen Shots
 
-Build mod.ff output example
+- Build mod.ff output example
 ![alt text](image.png)
 
-Build .iwd output example
+- Build .iwd output example
 ![alt text](image-1.png)
 
-Build sounds output example
+- Build sounds output example
 ![alt text](image-2.png)
