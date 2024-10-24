@@ -1,11 +1,11 @@
-# cod_waw_mod_launcher_build_tools
+# cod_waw.mod_launcher.build_tools
 
 3 modular components that do the same as the 3 stock waw mod launcher operations do on the 'Mod Builder' tab
 
 Build Features:
-    - mod.ff
-    - .iwd
-    - custom sounds
+- mod.ff
+- .iwd
+- custom sounds
 
 ## Installation
 
