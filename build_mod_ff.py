@@ -194,7 +194,7 @@ def copyIwdFromModToActivisionMod():
     # print(f'\n############################## ---/--/--- ##############################')
     # print(f'Copy modName.iwd end\n')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     CLEAN = True  # print()  # adds a newline
 
     steps = [
