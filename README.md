@@ -52,4 +52,4 @@ This is a Phils-Hub community-contributed project.
 
 - Build sounds output example
 
-![alt text](image-1.png)
+![alt text](image-3.png)
