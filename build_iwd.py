@@ -92,8 +92,9 @@ def buildIwd():
         root_dir=MOD_DIR,
         files_to_ignore=[
             'mod.ff',
-            '{MOD_NAME}.files',
+            f'{MOD_NAME}.files',
             f'{MOD_NAME}.iwd',
+            'console.log',
         ],
         folders_to_ignore=[
             'sound',

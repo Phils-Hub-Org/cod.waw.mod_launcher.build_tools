@@ -48,7 +48,7 @@ This is a Phils-Hub community-contributed project.
 
 - Build .iwd output example
 
-![alt text](image-2.png)
+![alt text](image-4.png)
 
 - Build sounds output example
 
