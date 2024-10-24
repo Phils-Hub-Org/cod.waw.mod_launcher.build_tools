@@ -85,10 +85,11 @@ def teardown(message):
     sys.exit(1)
 
 if __name__ == '__main__':
+    # function calls
     steps = [
-        lambda: buildSounds()
+        buildSounds
     ]
-    
+
     for step in steps:
         try:
             step()

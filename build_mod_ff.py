@@ -155,11 +155,11 @@ def copyModFfFromModToActivisionMod():
     # print(f'\nCopy mod.ff start')
     # print(f"############################## ---/--/--- ##############################\n")
     
-    modFfSource = os.path.join(MOD_DIR, 'mod.ff')
-    modFfDest = os.path.join(ACTIVISION_MOD_DIR, 'mod.ff')
-
     if not os.path.exists(ACTIVISION_MOD_DIR):
         os.makedirs(ACTIVISION_MOD_DIR)
+
+    modFfSource = os.path.join(MOD_DIR, 'mod.ff')
+    modFfDest = os.path.join(ACTIVISION_MOD_DIR, 'mod.ff')
 
     shutil.copy2(modFfSource, modFfDest)
 
@@ -174,22 +174,33 @@ def copyIwdFromModToActivisionMod():
     # print(f'\nCopy modName.iwd start')
     # print(f"############################## ---/--/--- ##############################\n")
     
-    # if modName.iwd is already present in appdata/mods, then return
-    # Additional (handy, but not required) step to ensure the modName.iwd is present in appdata/mods folder.
-    # As prev mentioned, this is default stock launcher behavior.
-    if os.path.exists(os.path.join(ACTIVISION_MOD_DIR, f'{MOD_NAME}.iwd')):
-        return
+    if not os.path.exists(ACTIVISION_MOD_DIR):
+        os.makedirs(ACTIVISION_MOD_DIR)
 
     modIwdSource = os.path.join(MOD_DIR, f'{MOD_NAME}.iwd')
     modIwdDest = os.path.join(ACTIVISION_MOD_DIR, f'{MOD_NAME}.iwd')
 
-    if not os.path.exists(ACTIVISION_MOD_DIR):
-        os.makedirs(ACTIVISION_MOD_DIR)
+    print(f'ACTIVISION_MOD_DIR: {ACTIVISION_MOD_DIR}')
+    print(f'modIwdSource: {modIwdSource}')
+    print(f'modIwdDest: {modIwdDest}')
+
+    # if modName.iwd is already present in appdata/mods, then return
+    # Additional (handy, but not required) step to ensure the modName.iwd is present in appdata/mods folder.
+    # As prev mentioned, this is default stock launcher behavior.
+    
+    # step 1: check if present in root/mods
+    if os.path.exists(modIwdSource):
+        print('iwd present in root/mods')
+
+        # step 2: check if present in appdata/mods
+        if not os.path.exists(modIwdDest):
+            print('iwd not in appdata/mods')
+            return
 
     shutil.copy2(modIwdSource, modIwdDest)
 
-    print(f"Copying  {modIwdSource}")
-    print(f"     to  {modIwdDest}")
+    # print(f"Copying  {modIwdSource}")
+    # print(f"     to  {modIwdDest}")
 
     # print(f'\n############################## ---/--/--- ##############################')
     # print(f'Copy modName.iwd end\n')
@@ -201,12 +212,13 @@ def teardown(message):
 if __name__ == '__main__':
     CLEAN = True  # print()  # adds a newline
 
+    # function calls
     steps = [
-        lambda: copyModCsvFromModToZoneSource(),
-        lambda: buildModFf(),
-        lambda: moveModFfFromZoneEnglishToMod(),
-        lambda: copyModFfFromModToActivisionMod(),
-        lambda: copyIwdFromModToActivisionMod()
+        copyModCsvFromModToZoneSource,
+        buildModFf,
+        moveModFfFromZoneEnglishToMod,
+        copyModFfFromModToActivisionMod,
+        copyIwdFromModToActivisionMod
     ]
 
     print()  # to separate from vs output

@@ -210,16 +210,17 @@ def teardown(message):
 if __name__ == "__main__":
     CLEAN = True  # print()  # adds a newline
 
+    # function calls
     steps = [
         # NOTE: Even though we're not using the stock 7za.exe anymore, may as well keep the output looking familiar.
-        lambda: print('7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14'),
-        lambda: print('Scanning'),
-        lambda: print(f'Creating archive {os.path.join(MOD_DIR, f'{MOD_NAME}.iwd')}'),
+        lambda arg='7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14': print(arg),
+        lambda arg='Scanning': print(arg),
+        lambda arg=f'Creating archive {os.path.join(MOD_DIR, f'{MOD_NAME}.iwd')}': print(arg),
 
-        lambda: buildIwd(),
-        lambda: copyModIwdFromModToActivisionMod(),
-        lambda: copyModFfFromModToActivisionMod(),
-        lambda: print('Everything is Ok')
+        buildIwd,
+        copyModIwdFromModToActivisionMod,
+        copyModFfFromModToActivisionMod,
+        lambda arg='Everything is Ok': print(arg)
     ]
 
     print()  # to separate from vs output
