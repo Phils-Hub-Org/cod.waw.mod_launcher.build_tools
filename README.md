@@ -54,3 +54,7 @@ This is a Phils-Hub community-contributed project.
 
 ![alt text](image-1.png)
 ![alt text](image-3.png)
+
+## Showcase Video
+
+https://www.youtube.com/watch?v=ZKVkgJzBWa8
