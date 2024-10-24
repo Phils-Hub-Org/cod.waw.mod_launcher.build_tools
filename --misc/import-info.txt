@@ -1,0 +1,8 @@
+import os, sys
+# required for importing my custom modules
+# only when trying to import from a '__main__' file that isn't run from root.
+projRoot = os.getcwd()
+if not projRoot in sys.path:
+    sys.path.insert(0, projRoot)
+
+import Utils.py_utility as py_utility

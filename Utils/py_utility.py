@@ -1,4 +1,4 @@
-import os, sys, subprocess, winshell
+import os, sys, subprocess
 from win32com.client import Dispatch
 
 def printProjectStructure(root_dir: str=os.getcwd(), files_to_ignore: list=[], folders_to_ignore: list=[], indent: int=0) -> None:
