@@ -27,8 +27,10 @@ None
 
 -cod_waw.mod_launcher.compile_tools
 https://github.com/Phils-Hub-Org/cod_waw.mod_launcher.compile_tools
+
 -cod_waw.mod_launcher.run_game_tools
 https://github.com/Phils-Hub-Org/cod_waw.mod_launcher.run_game_tools
+
 -cod_waw.mod_launcher.shortcut_tools
 https://github.com/Phils-Hub-Org/cod_waw.mod_launcher.shortcut_tools
 
