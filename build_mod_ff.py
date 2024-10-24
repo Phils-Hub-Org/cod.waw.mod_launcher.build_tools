@@ -179,28 +179,19 @@ def copyIwdFromModToActivisionMod():
 
     modIwdSource = os.path.join(MOD_DIR, f'{MOD_NAME}.iwd')
     modIwdDest = os.path.join(ACTIVISION_MOD_DIR, f'{MOD_NAME}.iwd')
-
-    print(f'ACTIVISION_MOD_DIR: {ACTIVISION_MOD_DIR}')
-    print(f'modIwdSource: {modIwdSource}')
-    print(f'modIwdDest: {modIwdDest}')
-
-    # if modName.iwd is already present in appdata/mods, then return
-    # Additional (handy, but not required) step to ensure the modName.iwd is present in appdata/mods folder.
-    # As prev mentioned, this is default stock launcher behavior.
     
     # step 1: check if present in root/mods
     if os.path.exists(modIwdSource):
-        print('iwd present in root/mods')
+        # print('iwd present in root/mods')
 
-        # step 2: check if present in appdata/mods
+        # step 2: check if not present in appdata/mods
         if not os.path.exists(modIwdDest):
-            print('iwd not in appdata/mods')
-            return
+            # print('iwd not in appdata/mods')
 
-    shutil.copy2(modIwdSource, modIwdDest)
+            shutil.copy2(modIwdSource, modIwdDest)
 
-    # print(f"Copying  {modIwdSource}")
-    # print(f"     to  {modIwdDest}")
+    print(f"Copying  {modIwdSource}")
+    print(f"     to  {modIwdDest}")
 
     # print(f'\n############################## ---/--/--- ##############################')
     # print(f'Copy modName.iwd end\n')

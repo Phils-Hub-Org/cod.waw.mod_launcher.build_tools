@@ -185,17 +185,21 @@ def copyModFfFromModToActivisionMod():
     # print(f'\nCopy mod.ff start')
     # print(f"############################## ---/--/--- ##############################\n")
 
-    # if mod.ff is already present in appdata/mods, then return
-    if os.path.exists(os.path.join(ACTIVISION_MOD_DIR, 'mod.ff')):
-        return
+    if not os.path.exists(ACTIVISION_MOD_DIR):
+        os.makedirs(ACTIVISION_MOD_DIR)
     
     modFfSource = os.path.join(MOD_DIR, 'mod.ff')
     modFfDest = os.path.join(ACTIVISION_MOD_DIR, 'mod.ff')
 
-    if not os.path.exists(ACTIVISION_MOD_DIR):
-        os.makedirs(ACTIVISION_MOD_DIR)
+    # step 1: check if present in root/mods
+    if os.path.exists(modFfSource):
+        # print('mod.ff present in root/mods')
 
-    shutil.copy2(modFfSource, modFfDest)
+        # step 2: check if not present in appdata/mods
+        if not os.path.exists(modFfDest):
+            # print('mod.ff not in appdata/mods')
+
+            shutil.copy2(modFfSource, modFfDest)
 
     print(f"Copying  {modFfSource}")
     print(f"     to  {modFfDest}")
