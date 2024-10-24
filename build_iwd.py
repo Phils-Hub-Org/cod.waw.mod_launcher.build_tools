@@ -203,6 +203,10 @@ def copyModFfFromModToActivisionMod():
     # print(f'\n############################## ---/--/--- ##############################')
     # print(f'Copy mod.ff end\n')
 
+def teardown(message):
+    print(message)
+    sys.exit(1)
+
 if __name__ == "__main__":
     CLEAN = True  # print()  # adds a newline
 
@@ -220,14 +224,12 @@ if __name__ == "__main__":
 
     print()  # to separate from vs output
 
-    try:
-        for step in steps:
+    for step in steps:
+        try:
             if CLEAN:
                 print()
             step()
-
-    except Exception as error:
-        print(error)
-        sys.exit(1)
+        except Exception as error:
+            teardown(f"Step {step.__name__} failed: {error}")
     
     print()  # to separate from vs output

@@ -40,7 +40,7 @@ Below vars:
     lowercase: used globally (scope: module)
 """
 
-import os, subprocess
+import os, sys, subprocess
 
 wawRootDir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
 BIN_DIR = os.path.join(wawRootDir, 'bin')
@@ -80,8 +80,17 @@ def buildSounds():
     # print(f"\n############################## ---/--/--- ##############################")
     # print(f"Build sounds end\n")
 
+def teardown(message):
+    print(message)
+    sys.exit(1)
+
 if __name__ == '__main__':
-    try:
-        buildSounds()
-    except Exception as e:
-        print(e)
+    steps = [
+        lambda: buildSounds()
+    ]
+    
+    for step in steps:
+        try:
+            step()
+        except Exception as error:
+            teardown(f"Step {step.__name__} failed: {error}")

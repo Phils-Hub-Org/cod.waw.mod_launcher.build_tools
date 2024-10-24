@@ -71,7 +71,7 @@ Below vars:
     lowercase: used globally (scope: module)
 """
 
-import os, subprocess, shutil
+import os, sys, subprocess, shutil
 
 wawRootDir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
 BIN_DIR = os.path.join(wawRootDir, 'bin')
@@ -194,6 +194,10 @@ def copyIwdFromModToActivisionMod():
     # print(f'\n############################## ---/--/--- ##############################')
     # print(f'Copy modName.iwd end\n')
 
+def teardown(message):
+    print(message)
+    sys.exit(1)
+
 if __name__ == '__main__':
     CLEAN = True  # print()  # adds a newline
 
@@ -207,13 +211,12 @@ if __name__ == '__main__':
 
     print()  # to separate from vs output
 
-    try:
-        for step in steps:
+    for step in steps:
+        try:
             if CLEAN:
                 print()
             step()
-
-    except Exception as error:
-        print(error)
+        except Exception as error:
+            teardown(f"Step {step.__name__} failed: {error}")
     
     print()  # to separate from vs output
