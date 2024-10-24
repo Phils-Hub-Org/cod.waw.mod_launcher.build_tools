@@ -1,51 +1,74 @@
-r""" WHEN mod.ff is present in AppData
-Actual Outut:
-    7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14
-    Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
-        to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\zm_tst1.iwd
-    Scanning
+r""" STOCK MOD LAUNCHER OUTPUT
+WHEN mod.ff is present in AppData
+    Actual Outut: (Although the order is a bit janky (copying output should be seen last) imo, so ill ensure that the output looks clearer).
+        7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14
+        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
+            to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\zm_tst1.iwd
+        Scanning
 
-    Creating archive D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
+        Creating archive D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
 
-    Compressing  mod.csv
+        Compressing  mod.csv
 
-    Everything is Ok
+        Everything is Ok
 
-Although the order is a bit janky imo, so ill ensure that the output is correct.
-My Output:
-    7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14
-    Scanning
+    My Output:
+        7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14
+        Scanning
 
-    Creating archive D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
+        Creating archive D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
 
-    Compressing  mod.csv
+        Compressing  mod.csv
 
-    Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
-         to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\zm_tst1.iwd
+        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
+            to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\zm_tst1.iwd
 
-    Everything is Ok
+        Everything is Ok
+
+WHEN mod.ff is NOT present in AppData
+    Actual Outut: (Again, the order is a bit janky, so ill be sure to correct it in my version).
+        7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14
+        Scanning
+        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff
+            to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\mod.ff
+        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
+            to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\zm_tst1.iwd
+
+        Creating archive D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
+
+        Compressing  mod.csv
+
+        Everything is Ok
+
+    My Output:
+        7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14
+        Scanning
+
+        Creating archive D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
+
+        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
+            to  C:\Users\Phil-\AppData\Local\Activision\CoDWaW\mods\zm_tst1\zm_tst1.iwd
+
+        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff
+            to  C:\Users\Phil-\AppData\Local\Activision\CoDWaW\mods\zm_tst1\mod.ff
+
+        Everything is Ok
 """
 
-r""" WHEN mod.ff is NOT present in AppData
-7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14
-Scanning
-Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff
-     to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\mod.ff
-Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
-     to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\zm_tst1.iwd
+""" NOTE
+(1):
+    mod.ff only gets copied to mods > appdata if its not present in the appdata/mods folder.
+    The actual compiling of the mod.ff file is obv not done here.
 
-Creating archive D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
+(2):
+    When testing, you will need to replace the below 'wawRootDir' with your actual WAW root directory, as well as the 'MOD_NAME' with the actual name of your mod.
 
-Compressing  mod.csv
-
-Everything is Ok
+Below vars:
+    UPPERCASE: Used globally (scope: module) and locally (scope: function)
+    lowercase: used globally (scope: module)
 """
 
-import os, shutil, zipfile
-
-# NOTE:
-    # mod.ff only gets copied from mods > appdata if its not present in appdata.
-    # The actual compiling of the mod.ff file is obv not done here.
+import os, sys, shutil, zipfile
 
 WAW_ROOT_DIR = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
 MODS_DIR = os.path.join(WAW_ROOT_DIR, 'mods')
@@ -108,23 +131,35 @@ def buildIwd():
     # print(f'\n############################## ---/--/--- ##############################')
     # print(f'Build iwd end\n')
 
-def copyModFfFromModToActivisionMod():
-    # print(f'\nCopy mod.ff start')
-    # print(f"############################## ---/--/--- ##############################\n")
-    
-    modFfSource = os.path.join(MOD_DIR, 'mod.ff')
-    modFfDest = os.path.join(ACTIVISION_MOD_DIR, 'mod.ff')
+# Utilized by: buildIwd()
+def grabModStructure(root_dir: str=os.getcwd(), files_to_ignore: list=[], folders_to_ignore: list=[]) -> dict:
+    structure = {}
+    for item in os.listdir(root_dir):
+        item_path = os.path.join(root_dir, item)
+        if os.path.isdir(item_path):
+            if any(folder in item for folder in folders_to_ignore):
+                continue
+            # Recursively build the folder structure
+            structure[item] = grabModStructure(item_path, files_to_ignore, folders_to_ignore)
+        else:
+            if any(file_name in item for file_name in files_to_ignore):
+                continue
+            # Store the file in the dictionary
+            structure[item] = None
+    return structure
 
-    if not os.path.exists(ACTIVISION_MOD_DIR):
-        os.makedirs(ACTIVISION_MOD_DIR)
+# Utilized by: buildIwd()
+def iterateFiles(data, parent='', print_files=False, action=None):
+    for key, value in data.items():
+        current_path = f"{parent}/{key}" if parent else key  # Join parent with current folder/file
+        if isinstance(value, dict):  # If value is a dictionary, recurse
+            iterateFiles(value, current_path, print_files, action)
+        else:  # If it's a file (None in this case), print the path
+            if print_files:
+                print(current_path)
 
-    shutil.copy2(modFfSource, modFfDest)
-
-    print(f"Copying  {modFfSource}")
-    print(f"     to  {modFfDest}")
-
-    # print(f'\n############################## ---/--/--- ##############################')
-    # print(f'Copy mod.ff end\n')
+            if action:
+                action(current_path)
 
 def copyModIwdFromModToActivisionMod():
     # print(f'\nCopy mod.iwd start')
@@ -144,60 +179,54 @@ def copyModIwdFromModToActivisionMod():
     # print(f'\n############################## ---/--/--- ##############################')
     # print(f'Copy mod.iwd end\n')
 
-def grabModStructure(root_dir: str=os.getcwd(), files_to_ignore: list=[], folders_to_ignore: list=[]) -> dict:
-    structure = {}
-    for item in os.listdir(root_dir):
-        item_path = os.path.join(root_dir, item)
-        if os.path.isdir(item_path):
-            if any(folder in item for folder in folders_to_ignore):
-                continue
-            # Recursively build the folder structure
-            structure[item] = grabModStructure(item_path, files_to_ignore, folders_to_ignore)
-        else:
-            if any(file_name in item for file_name in files_to_ignore):
-                continue
-            # Store the file in the dictionary
-            structure[item] = None
-    return structure
+# Just a nice touch that the stock launcher has where it ensures the mod.ff is present in appdata/mods folder during the iwd stage.
+def copyModFfFromModToActivisionMod():
+    # print(f'\nCopy mod.ff start')
+    # print(f"############################## ---/--/--- ##############################\n")
 
-def iterateFiles(data, parent='', print_files=False, action=None):
-    for key, value in data.items():
-        current_path = f"{parent}/{key}" if parent else key  # Join parent with current folder/file
-        if isinstance(value, dict):  # If value is a dictionary, recurse
-            iterateFiles(value, current_path, print_files, action)
-        else:  # If it's a file (None in this case), print the path
-            if print_files:
-                print(current_path)
+    # if mod.ff is already present in appdata/mods, then return
+    if os.path.exists(os.path.join(ACTIVISION_MOD_DIR, 'mod.ff')):
+        return
+    
+    modFfSource = os.path.join(MOD_DIR, 'mod.ff')
+    modFfDest = os.path.join(ACTIVISION_MOD_DIR, 'mod.ff')
 
-            if action:
-                action(current_path)
+    if not os.path.exists(ACTIVISION_MOD_DIR):
+        os.makedirs(ACTIVISION_MOD_DIR)
+
+    shutil.copy2(modFfSource, modFfDest)
+
+    print(f"Copying  {modFfSource}")
+    print(f"     to  {modFfDest}")
+
+    # print(f'\n############################## ---/--/--- ##############################')
+    # print(f'Copy mod.ff end\n')
 
 if __name__ == "__main__":
-    CLEAN = True
-    # print()  # adds a newline
+    CLEAN = True  # print()  # adds a newline
+
+    steps = [
+        # NOTE: Even though we're not using the stock 7za.exe anymore, may as well keep the output looking familiar.
+        lambda: print('7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14'),
+        lambda: print('Scanning'),
+        lambda: print(f'Creating archive {os.path.join(MOD_DIR, f'{MOD_NAME}.iwd')}'),
+
+        lambda: buildIwd(),
+        lambda: copyModIwdFromModToActivisionMod(),
+        lambda: copyModFfFromModToActivisionMod(),
+        lambda: print('Everything is Ok')
+    ]
+
+    print()  # to separate from vs output
 
     try:
-        print()  # to separate from vs output
+        for step in steps:
+            if CLEAN:
+                print()
+            step()
 
-        print('7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14')
-        print('Scanning')
-        if CLEAN:
-            print()
-        print(f'Creating archive {os.path.join(MOD_DIR, f'{MOD_NAME}.iwd')}')
-        if CLEAN:
-            print()
-        buildIwd()
-        if CLEAN:
-            print()
-        if not os.path.exists(os.path.join(ACTIVISION_MOD_DIR, f'{MOD_NAME}.ff')):
-            copyModFfFromModToActivisionMod()
-        if CLEAN:
-            print()
-        copyModIwdFromModToActivisionMod()
-        if CLEAN:
-            print()
-        print('Everything is Ok')
-
-        print()  # to separate from vs output
-    except Exception as e:
-        print(e)
+    except Exception as error:
+        print(error)
+        sys.exit(1)
+    
+    print()  # to separate from vs output

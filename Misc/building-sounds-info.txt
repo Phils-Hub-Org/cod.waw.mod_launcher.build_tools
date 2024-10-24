@@ -1,0 +1,21 @@
+Building sounds steps:
+    (1):
+        place your sound in 'waw_root_dir/sound_assets/Raw/sound/<<your custom folder[]>>/your sound.wav'
+        e.g, 'waw_root_dir/sound_assets/Raw/sound/custom/fire.wav'
+    (2):
+        either create your own soundalias.csv file or use the placeholder (custom_sound.csv) one provided and modify the path as needed.
+        place said file in 'waw_root_dir/raw/soundaliases/<<your soundalias.csv file>>
+        e.g, 'waw_root_dir/raw/soundaliases/custom_sound.csv'
+        
+NOTE (mod.csv):
+    (1):
+        When you've successfully built the sound, it will appear in 'waw_root_dir/raw/sound/<<your custom folder>>/your sound.wav'
+        e.g, 'waw_root_dir/raw/sound/custom/fire.wav'
+    
+    (2):
+        In order to rebuild the same sound from the same folder, you will need to first delete the previously converted sound file from 'waw_root_dir/raw/sound/<<your custom folder>>/your sound.wav'
+
+    (3):
+        You do not need to place the following in the mod launchers mod.csv section in order to build a sound, to play a sound in-game sure, but not to just build a sound.
+        // identifier | soundalias.csv filename | level name (i think)? | all_sp (not sure, but is needed i believe)
+        // sound,custom_sound,,all_sp
