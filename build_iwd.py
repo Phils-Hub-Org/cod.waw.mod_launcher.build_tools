@@ -43,8 +43,9 @@ Everything is Ok
 
 import os, shutil, zipfile
 
-# NOTE: mod.ff only gets copied from mods > appdata if its not present in appdata.
-# The actual compiling of the mod.ff file is obv not done here.
+# NOTE:
+    # mod.ff only gets copied from mods > appdata if its not present in appdata.
+    # The actual compiling of the mod.ff file is obv not done here.
 
 WAW_ROOT_DIR = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
 MODS_DIR = os.path.join(WAW_ROOT_DIR, 'mods')
@@ -57,12 +58,7 @@ activisionDir = os.path.join(appdataDir, 'Local', 'Activision')
 activisionModsDir = os.path.join(activisionDir, 'CoDWaW', 'mods')
 ACTIVISION_MOD_DIR = os.path.join(activisionModsDir, MOD_NAME)
 
-LOGGING = False
-
 def buildIwd():
-    if LOGGING:
-        logList = []
-
     # print(f'\nBuild iwd start')
     # print(f"############################## ---/--/--- ##############################\n")
     
@@ -73,7 +69,7 @@ def buildIwd():
         root_dir=MOD_DIR,
         files_to_ignore=[
             'mod.ff',
-            'zm_tst1.files',
+            '{MOD_NAME}.files',
             f'{MOD_NAME}.iwd',
         ],
         folders_to_ignore=[
@@ -108,11 +104,6 @@ def buildIwd():
             
             # Add the file to the zip archive
             zipf.write(file_to_add, file_in_iwd)
-
-    if LOGGING:
-        with open('iwd.log', 'w') as f:
-            for log in logList:
-                f.write("%s\n" % log)
 
     # print(f'\n############################## ---/--/--- ##############################')
     # print(f'Build iwd end\n')

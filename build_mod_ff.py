@@ -14,7 +14,9 @@ Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1
      to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\mod.ff
 """
 
-# NOTE: When using this in a GUI application, you will need to grab the text from your mod.csv widget section and paste it into the mod.csv file before copying it from mods > zone_source.
+# NOTE:
+    # When using this in a GUI application, you will need to grab the text from your mod.csv widget section and paste it into the mod.csv file before copying it from mods > zone_source.
+    # I've added the logic to copy content from mod.csv in mod folder to zone_source folder. So all you need to do for a GUI-based application is copy text from mod.csv widget-section to mod.csv file in mod folder then this module can take care of the rest.
 
 import os, subprocess, shutil
 
