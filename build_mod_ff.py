@@ -128,17 +128,19 @@ def teardown(message: str, printFunc=print) -> None:
 # Example usage
 if __name__ == '__main__':
     # change these 2 as needed
-    modName = 'zm_test1'
-    wawRootDir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
+    # NOTE: Be careful with variables that are in global scope like the below 2.
+    #       I change their styling from the args styling so function couldn't utilize them as they should be passed in as args.
+    mod_name = 'zm_test1'
+    waw_root_dir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War' 
 
     print()  # to separate from vs output
     build(
-        modDir=os.path.join(os.path.join(wawRootDir, 'mods'), modName),
-        zoneSourceDir=os.path.join(wawRootDir, 'zone_source'),
-        modName=modName,
-        binDir=os.path.join(wawRootDir, 'bin'),
-        zoneEnglishDir=os.path.join(wawRootDir, 'zone', 'english'),
-        activisionModDir=os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'Activision', 'CoDWaW', 'mods', modName),  # '~' = home dir
+        modDir=os.path.join(os.path.join(waw_root_dir, 'mods'), mod_name),
+        zoneSourceDir=os.path.join(waw_root_dir, 'zone_source'),
+        modName=mod_name,
+        binDir=os.path.join(waw_root_dir, 'bin'),
+        zoneEnglishDir=os.path.join(waw_root_dir, 'zone', 'english'),
+        activisionModDir=os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'Activision', 'CoDWaW', 'mods', mod_name),  # '~' = home dir
         # printFunc=print  # the build func already utilizes print as the default output, so only use this arg when wanting to handle the output differently.
     )
     print()  # to separate from vs output

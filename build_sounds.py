@@ -60,12 +60,14 @@ def teardown(message: str, printFunc=print) -> None:
 # Example usage
 if __name__ == '__main__':
     # change these 2 as needed
-    wawRootDir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
-    binDir = os.path.join(wawRootDir, 'bin')
+    # NOTE: Be careful with variables that are in global scope like the below 2.
+    #       I change their styling from the args styling so function couldn't utilize them as they should be passed in as args.
+    waw_root_dir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War' 
+    bin_dir = os.path.join(waw_root_dir, 'bin')
 
     print()  # to separate from vs output
     build(
-        binDir=binDir,
+        binDir=bin_dir,
         # printFunc=print  # the build func already utilizes print as the default output, so only use this arg when wanting to handle the output differently.
     )
     print()  # to separate from vs output
