@@ -2,5 +2,5 @@ name,file,platform,sequence,vol_min,vol_max,dist_min,dist_max,limit_count,limit_
 # Custom sounds building - "sound,custom_sound,,all_sp" in mod_builder.csv
 # computerized_sfx: soundalias (use in .gsc like playsound("computerized_sfx");)
 # custom\computerized.wav: folder\file
-# You can safely use this file as a placeholder in order to build your new custom sound, just be sure to change the 'folder\file' to match yours.
+# You can safely use this file as a placeholder in order to build your custom sound, just be sure to change the 'folder\file' to match yours.
 computerized_sfx,custom\computerized.wav,,,1,1,,,,,,,full_vol,,,0.8,,,,1,1,,2d,,,,,,,,,,,wpn_fnt,0.2,1,,,,,,,,,,90,90,0.25,1,,
