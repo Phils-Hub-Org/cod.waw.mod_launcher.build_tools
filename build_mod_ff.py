@@ -8,31 +8,34 @@
     So this module does take care of that, but for the actual building of the .iwd, check out the 'build_iwd.py' module.
 
 (3):
+    During the copy mod.csv from mod folder to zone_source folder stage, if said mod.csv file does not exist, it will be created.
+
+(4):
     When using this in a GUI application, you will need to grab the text from your mod.csv widget section and paste it into the mod.csv file before copying it from mods > zone_source.
     I've added the logic to copy content from mod.csv in mod folder to zone_source folder. So all you need to do for a GUI-based application is copy text from mod.csv widget-section to mod.csv file in mod folder then this module can take care of the rest.    
+
+For output information refer to: 'Misc/building-mod.ff-output.txt'    
 """
 
 import os, sys, csv, shutil, subprocess
 
-def build(modDir: str, zoneSourceDir: str, modName: str, binDir: str, zoneEnglishDir: str, activisionModDir: str, printFunc=None) -> None:
-    printHandle = print if printFunc is None else printFunc
-
+def build(modDir: str, zoneSourceDir: str, modName: str, binDir: str, zoneEnglishDir: str, activisionModDir: str, printFunc=print) -> None:
     # function calls
     steps = [
-        lambda arg1=modDir, arg2=zoneSourceDir, arg3=printHandle: copyModCsvFromModToZoneSource(arg1, arg2, arg3),
-        lambda arg1=modName, arg2=binDir, arg3=printHandle: buildModFf(arg1, arg2, arg3),
-        lambda arg1=zoneEnglishDir, arg2=modDir, arg3=printHandle: moveModFfFromZoneEnglishToMod(arg1, arg2, arg3),
-        lambda arg1=activisionModDir, arg2=modDir, arg3=printHandle: copyModFfFromModToActivisionMod(arg1, arg2, arg3),
-        lambda arg1=activisionModDir, arg2=modDir, arg3=modName, arg4=printHandle: copyIwdFromModToActivisionMod(arg1, arg2, arg3, arg4),
+        lambda arg1=modDir, arg2=zoneSourceDir, arg3=printFunc: copyModCsvFromModToZoneSource(arg1, arg2, arg3),
+        lambda arg1=modName, arg2=binDir, arg3=printFunc: buildModFf(arg1, arg2, arg3),
+        lambda arg1=zoneEnglishDir, arg2=modDir, arg3=printFunc: moveModFfFromZoneEnglishToMod(arg1, arg2, arg3),
+        lambda arg1=activisionModDir, arg2=modDir, arg3=printFunc: copyModFfFromModToActivisionMod(arg1, arg2, arg3),
+        lambda arg1=activisionModDir, arg2=modDir, arg3=modName, arg4=printFunc: copyIwdFromModToActivisionMod(arg1, arg2, arg3, arg4),
     ]
 
     for step in steps:
         try:
             step()
         except Exception as error:
-            teardown(f"Step {step.__name__} failed: {error}")
+            teardown(f"Step {step.__name__} failed: {error}", printFunc=printFunc)
 
-def copyModCsvFromModToZoneSource(modDir: str, zoneSourceDir: str, printFunc=None) -> None:
+def copyModCsvFromModToZoneSource(modDir: str, zoneSourceDir: str, printFunc=print) -> None:
     mod_csv_path = os.path.join(modDir, 'mod.csv')
 
     # Check if the file exists (this would usually be handled by the mod launcher)
@@ -46,14 +49,10 @@ def copyModCsvFromModToZoneSource(modDir: str, zoneSourceDir: str, printFunc=Non
     
     shutil.copy2(mod_csv_path, zone_source_path)
 
-    printHandle = print if printFunc is None else printFunc
-    for x in [
-        f"Copying  {mod_csv_path}",
-        f"     to  {zone_source_path}"
-    ]:
-        printHandle(x)
+    printFunc(f"Copying  {mod_csv_path}")
+    printFunc(f"     to  {zone_source_path}")
 
-def buildModFf(modName: str, binDir: str, printFunc=None) -> None:
+def buildModFf(modName: str, binDir: str, printFunc=print) -> None:
     args = ['linker_pc', '-nopause', '-language', 'english', '-moddir', modName, 'mod']
 
     # Use Popen to run the linker asynchronously
@@ -65,8 +64,6 @@ def buildModFf(modName: str, binDir: str, printFunc=None) -> None:
         stderr=subprocess.PIPE,
         text=True  # Enable text mode for easier string handling
     )
-    
-    printHandle = print if printFunc is None else printFunc
 
     # Read stdout and stderr in real time
     while True:
@@ -74,27 +71,23 @@ def buildModFf(modName: str, binDir: str, printFunc=None) -> None:
         if output == '' and process.poll() is not None:
             break
         if output:
-            printHandle(output.strip())
+            printFunc(output.strip())
 
     # Capture the stderr output after the process finishes
     stderr = process.stderr.read()
     if stderr:
-        printHandle(stderr.strip())
+        printFunc(stderr.strip())
 
-def moveModFfFromZoneEnglishToMod(zoneEnglishDir: str, modDir: str, printFunc=None) -> None:
+def moveModFfFromZoneEnglishToMod(zoneEnglishDir: str, modDir: str, printFunc=print) -> None:
     modFfSource = os.path.join(zoneEnglishDir, 'mod.ff')
     modFfDest = os.path.join(modDir, 'mod.ff')
 
     shutil.move(modFfSource, modFfDest)
 
-    printHandle = print if printFunc is None else printFunc
-    for x in [
-        f"Moving  {modFfSource}",
-        f"    to  {modFfDest}"
-    ]:
-        printHandle(x)
+    printFunc(f"Moving  {modFfSource}")
+    printFunc(f"    to  {modFfDest}")
 
-def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, printFunc=None) -> None:
+def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, printFunc=print) -> None:
     if not os.path.exists(activisionModDir):
         os.makedirs(activisionModDir)
 
@@ -103,14 +96,10 @@ def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, printFun
 
     shutil.copy2(modFfSource, modFfDest)
 
-    printHandle = print if printFunc is None else printFunc
-    for x in [
-        f"Copying  {modFfSource}",
-        f"     to  {modFfDest}"
-    ]:
-        printHandle(x)
+    printFunc(f"Copying  {modFfSource}")
+    printFunc(f"     to  {modFfDest}")
 
-def copyIwdFromModToActivisionMod(activisionModDir: str, modDir: str, modName: str, printFunc=None) -> None:
+def copyIwdFromModToActivisionMod(activisionModDir: str, modDir: str, modName: str, printFunc=print) -> None:
     # Just a nice touch that the stock launcher has where it ensures the modName.iwd is present in appdata/mods folder during the mod.ff stage.
     
     if not os.path.exists(activisionModDir):
@@ -129,15 +118,11 @@ def copyIwdFromModToActivisionMod(activisionModDir: str, modDir: str, modName: s
 
             shutil.copy2(modIwdSource, modIwdDest)
 
-    printHandle = print if printFunc is None else printFunc
-    for x in [
-        f"Copying  {modIwdSource}",
-        f"     to  {modIwdDest}"
-    ]:
-        printHandle(x)
+    printFunc(f"Copying  {modIwdSource}")
+    printFunc(f"     to  {modIwdDest}")
 
-def teardown(message: str, printFunc=None) -> None:
-    print(message) if printFunc is None else printFunc(message)
+def teardown(message: str, printFunc=print) -> None:
+    printFunc(message)
     sys.exit(1)
 
 # Example usage
@@ -154,6 +139,6 @@ if __name__ == '__main__':
         binDir=os.path.join(wawRootDir, 'bin'),
         zoneEnglishDir=os.path.join(wawRootDir, 'zone', 'english'),
         activisionModDir=os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'Activision', 'CoDWaW', 'mods', modName),  # '~' = home dir
-        printFunc=print
+        # printFunc=print  # the build func already utilizes print as the default output, so only use this arg when wanting to handle the output differently.
     )
     print()  # to separate from vs output
