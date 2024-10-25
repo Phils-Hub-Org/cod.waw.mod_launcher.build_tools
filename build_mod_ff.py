@@ -1,58 +1,3 @@
-r""" STOCK MOD LAUNCHER OUTPUT
-WHEN modName.iwd is present in AppData
-    Actual Outut (Although the order is fine, ill add some new lines to my version for clarity):
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.csv
-            to  D:\SteamLibrary\steamapps\common\Call of Duty World at War\zone_source\mod.csv
-        args: -nopause -language english -moddir zm_tst1 mod
-        Fastfile 1 of 1, "mod": [ver. 387] process...link...compress...save...done.
-        Moving   D:\SteamLibrary\steamapps\common\Call of Duty World at War\zone\english\mod.ff
-            to   D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff
-            to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\mod.ff
-    
-    My Output:
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.csv
-            to  D:\SteamLibrary\steamapps\common\Call of Duty World at War\zone_source\mod.csv 
-
-        args: -nopause -language english -moddir zm_tst1 mod
-        Fastfile 1 of 1, "mod": [ver. 387] process...link...compress...save...done.
-
-        Moving  D:\SteamLibrary\steamapps\common\Call of Duty World at War\zone\english\mod.ff 
-            to  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff 
-
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff
-            to  C:\Users\Phil-\AppData\Local\Activision\CoDWaW\mods\zm_tst1\mod.ff
-
-WHEN modName.iwd is NOT present in AppData
-    Actual Outut: (Again, the order is fine, but ill add some new lines to my version for clarity):
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.csv
-            to  D:\SteamLibrary\steamapps\common\Call of Duty World at War\zone_source\mod.csv
-        args: -nopause -language english -moddir zm_tst1 mod
-        Fastfile 1 of 1, "mod": [ver. 387] process...link...compress...save...done.
-        Moving   D:\SteamLibrary\steamapps\common\Call of Duty World at War\zone\english\mod.ff
-            to   D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff
-            to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\mod.ff
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
-            to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\zm_tst1.iwd
-    
-    My Output:
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.csv
-            to  D:\SteamLibrary\steamapps\common\Call of Duty World at War\zone_source\mod.csv 
-
-        args: -nopause -language english -moddir zm_tst1 mod
-        Fastfile 1 of 1, "mod": [ver. 387] process...link...compress...save...done.
-
-        Moving  D:\SteamLibrary\steamapps\common\Call of Duty World at War\zone\english\mod.ff      
-            to  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff      
-
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff     
-            to  C:\Users\Phil-\AppData\Local\Activision\CoDWaW\mods\zm_tst1\mod.ff
-
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
-            to  C:\Users\Phil-\AppData\Local\Activision\CoDWaW\mods\zm_tst1\zm_tst1.iwd
-"""
-
 """ NOTE
 (1):
     When testing, you will need to replace the below 'wawRootDir' with your actual WAW root directory
@@ -147,6 +92,26 @@ def teardown(message: str) -> None:
     print(message)
     sys.exit(1)
 
+def buildMod(modDir: str, zoneSourceDir: str, modName: str, binDir: str, zoneEnglishDir: str, activisionModDir: str) -> None:
+    CLEAN = True  # print()  # adds a newline
+
+    # function calls
+    steps = [
+        lambda arg1=modDir, arg2=zoneSourceDir: copyModCsvFromModToZoneSource(arg1, arg2),
+        lambda arg1=modName, arg2=binDir: buildModFf(arg1, arg2),
+        lambda arg1=zoneEnglishDir, arg2=modDir: moveModFfFromZoneEnglishToMod(arg1, arg2),
+        lambda arg1=activisionModDir, arg2=modDir: copyModFfFromModToActivisionMod(arg1, arg2),
+        lambda arg1=activisionModDir, arg2=modDir, arg3=modName: copyIwdFromModToActivisionMod(arg1, arg2, arg3),
+    ]
+
+    for step in steps:
+        try:
+            if CLEAN:
+                print()
+            step()
+        except Exception as error:
+            teardown(f"Step {step.__name__} failed: {error}")
+
 if __name__ == '__main__':
     # change these 2 as needed
     modName = 'zm_tst1'
@@ -160,25 +125,13 @@ if __name__ == '__main__':
     zoneEnglishDir = os.path.join(wawRootDir, 'zone', 'english')
     activisionModDir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'Activision', 'CoDWaW', 'mods', modName)  # '~' = home dir
 
-    CLEAN = True  # print()  # adds a newline
-
-    # function calls
-    steps = [
-        lambda arg1=modDir, arg2=zoneSourceDir: copyModCsvFromModToZoneSource(arg1, arg2),
-        lambda arg1=modName, arg2=binDir: buildModFf(arg1, arg2),
-        lambda arg1=zoneEnglishDir, arg2=modDir: moveModFfFromZoneEnglishToMod(arg1, arg2),
-        lambda arg1=activisionModDir, arg2=modDir: copyModFfFromModToActivisionMod(arg1, arg2),
-        lambda arg1=activisionModDir, arg2=modDir, arg3=modName: copyIwdFromModToActivisionMod(arg1, arg2, arg3),
-    ]
-
     print()  # to separate from vs output
-
-    for step in steps:
-        try:
-            if CLEAN:
-                print()
-            step()
-        except Exception as error:
-            teardown(f"Step {step.__name__} failed: {error}")
-    
+    buildMod(
+        modDir=modDir,
+        zoneSourceDir=zoneSourceDir,
+        modName=modName,
+        binDir=binDir,
+        zoneEnglishDir=zoneEnglishDir,
+        activisionModDir=activisionModDir
+    )
     print()  # to separate from vs output
