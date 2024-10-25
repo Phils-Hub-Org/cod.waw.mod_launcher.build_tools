@@ -1,0 +1,31 @@
+STOCK MOD LAUNCHER OUTPUT:
+
+    WHEN modName.iwd is present in AppData:
+
+        Outut:
+            7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14
+            Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
+                to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\zm_tst1.iwd
+            Scanning
+
+            Creating archive D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
+
+            Compressing  mod.csv
+
+            Everything is Ok
+
+    WHEN modName.iwd is NOT present in AppData:
+    
+        Outut:
+            7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14
+            Scanning
+            Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff
+                to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\mod.ff
+            Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
+                to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\zm_tst1.iwd
+
+            Creating archive D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
+
+            Compressing  mod.csv
+
+            Everything is Ok

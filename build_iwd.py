@@ -1,99 +1,47 @@
-r""" STOCK MOD LAUNCHER OUTPUT
-WHEN mod.ff is present in AppData
-    Actual Outut: (Although the order is a bit janky (copying output should be seen last) imo, so ill ensure that the output looks clearer).
-        7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
-            to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\zm_tst1.iwd
-        Scanning
-
-        Creating archive D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
-
-        Compressing  mod.csv
-
-        Everything is Ok
-
-    My Output:
-        7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14
-        Scanning
-
-        Creating archive D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
-
-        Compressing  mod.csv
-
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
-            to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\zm_tst1.iwd
-
-        Everything is Ok
-
-WHEN mod.ff is NOT present in AppData
-    Actual Outut: (Again, the order is a bit janky, so ill be sure to correct it in my version).
-        7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14
-        Scanning
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff
-            to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\mod.ff
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
-            to  C:\Users\Phil-\AppData\Local\Activision\CodWaW\mods\zm_tst1\zm_tst1.iwd
-
-        Creating archive D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
-
-        Compressing  mod.csv
-
-        Everything is Ok
-
-    My Output:
-        7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14
-        Scanning
-
-        Creating archive D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
-
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\zm_tst1.iwd
-            to  C:\Users\Phil-\AppData\Local\Activision\CoDWaW\mods\zm_tst1\zm_tst1.iwd
-
-        Copying  D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\zm_tst1\mod.ff
-            to  C:\Users\Phil-\AppData\Local\Activision\CoDWaW\mods\zm_tst1\mod.ff
-
-        Everything is Ok
-"""
-
 """ NOTE
 (1):
-    mod.ff only gets copied to mods > appdata if its not present in the appdata/mods folder.
-    The actual compiling of the mod.ff file is obv not done here.
+    When testing, you will need to replace the below 'wawRootDir' with your actual WAW root directory
+    as well as the 'modName' with the actual name of your mod.
 
 (2):
-    When testing, you will need to replace the below 'wawRootDir' with your actual WAW root directory, as well as the 'MOD_NAME' with the actual name of your mod.
-
-Below vars:
-    UPPERCASE: Used globally (scope: module) and locally (scope: function)
-    lowercase: used globally (scope: module)
+    The default stock mod launcher behaviour is to copy mod.ff to appdata/mods folder if it is not present there during the iwd stage.
+    So this module does take care of that, but for the actual building of the mod.ff, check out the 'build_mod_ff.py' module.
 """
 
 import os, sys, shutil, zipfile
 
-WAW_ROOT_DIR = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
-MODS_DIR = os.path.join(WAW_ROOT_DIR, 'mods')
-MOD_NAME = 'mp_test7'
-MOD_DIR = os.path.join(MODS_DIR, MOD_NAME)
+def build(modDir: str, zoneSourceDir: str, modName: str, binDir: str, zoneEnglishDir: str, activisionModDir: str, printFunc=None) -> None:
+    printHandle = print if printFunc is None else printFunc
 
-homeDir = os.path.expanduser('~')
-appdataDir = os.path.join(homeDir, 'AppData')
-activisionDir = os.path.join(appdataDir, 'Local', 'Activision')
-activisionModsDir = os.path.join(activisionDir, 'CoDWaW', 'mods')
-ACTIVISION_MOD_DIR = os.path.join(activisionModsDir, MOD_NAME)
+    # function calls
+    steps = [
+        # NOTE: Even though we're not using the stock 7za.exe anymore, may as well keep the output looking familiar.
+        lambda arg1='7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14': printHandle(arg1),
+        lambda arg1='Scanning': printHandle(arg1),
+        lambda arg1=f'Creating archive {os.path.join(modDir, f'{modName}.iwd')}': printHandle(arg1),
 
-def buildIwd():
-    # print(f'\nBuild iwd start')
-    # print(f"############################## ---/--/--- ##############################\n")
-    
+        lambda arg1=modDir, arg2=modName, arg3=printHandle: buildIwd(arg1, arg2, arg3),
+        lambda arg1=modDir, arg2=activisionModDir, arg3=printHandle: copyModIwdFromModToActivisionMod(arg1, arg2, arg3),
+        lambda arg1=activisionModDir, arg2=modDir, arg3=printHandle: copyModFfFromModToActivisionMod(arg1, arg2, arg3),
+        lambda arg1='Everything is Ok': printHandle(arg1),
+    ]
+
+    for step in steps:
+        try:
+            step()
+        except Exception as error:
+            teardown(f"Step {step.__name__} failed: {error}")
+
+def buildIwd(modDir: str, modName: str, printFunc=None) -> None:
     # Anything to be built into the modname.iwd will need its full mod dir path (exluding leading up to mod root).
     array = []
 
     itemsToPkgIntoIwd = grabModStructure(
-        root_dir=MOD_DIR,
+        root_dir=modDir,
         files_to_ignore=[
             'mod.ff',
-            f'{MOD_NAME}.files',
-            f'{MOD_NAME}.iwd',
+            f'{modName}.files',
+            f'{modName}.iwd',
             'console.log',
         ],
         folders_to_ignore=[
@@ -101,9 +49,11 @@ def buildIwd():
         ]
     )
 
-    iterateFiles(itemsToPkgIntoIwd, action=lambda x: array.append(x))
+    printHandle = print if printFunc is None else printFunc
 
-    iwdDest = os.path.join(MOD_DIR, f'{MOD_NAME}.iwd')
+    iterateFiles(itemsToPkgIntoIwd, action=lambda x: array.append(x), printFunc=printHandle)
+
+    iwdDest = os.path.join(modDir, f'{modName}.iwd')
 
     # delete old iwd if it exists
     if os.path.exists(iwdDest):
@@ -117,20 +67,17 @@ def buildIwd():
             # For example, placing a specific file in the 'aitype' folder inside the iwd
             
             # Full path to the source file on the disk
-            file_to_add = os.path.join(MOD_DIR, item).replace('\\', '/')
+            file_to_add = os.path.join(modDir, item).replace('\\', '/')
             # file_to_add = 'D:/SteamLibrary/steamapps/common/Call of Duty World at War/mods/zm_tst1/aitype/axis_zombie_ger_ber_sshonor.gsc'
             
             # Specify the destination path inside the iwd archive (as if you're recreating the folder structure)
             file_in_iwd = item
             # file_in_iwd = 'aitype/axis_zombie_ger_ber_sshonor.gsc'
 
-            print(f'Compressing  {item}')
+            printHandle(f'Compressing  {item}')
             
             # Add the file to the zip archive
             zipf.write(file_to_add, file_in_iwd)
-
-    # print(f'\n############################## ---/--/--- ##############################')
-    # print(f'Build iwd end\n')
 
 # Utilized by: buildIwd()
 def grabModStructure(root_dir: str=os.getcwd(), files_to_ignore: list=[], folders_to_ignore: list=[]) -> dict:
@@ -150,46 +97,41 @@ def grabModStructure(root_dir: str=os.getcwd(), files_to_ignore: list=[], folder
     return structure
 
 # Utilized by: buildIwd()
-def iterateFiles(data, parent='', print_files=False, action=None):
+def iterateFiles(data, parent: str='', print_files: bool=False, action: callable=None, printFunc=None) -> None:
+    printHandle = print if printFunc is None else printFunc
+
     for key, value in data.items():
         current_path = f"{parent}/{key}" if parent else key  # Join parent with current folder/file
         if isinstance(value, dict):  # If value is a dictionary, recurse
-            iterateFiles(value, current_path, print_files, action)
+            iterateFiles(value, current_path, print_files, action, printFunc)
         else:  # If it's a file (None in this case), print the path
             if print_files:
-                print(current_path)
+                printHandle(current_path)
 
             if action:
                 action(current_path)
 
-def copyModIwdFromModToActivisionMod():
-    # print(f'\nCopy mod.iwd start')
-    # print(f"############################## ---/--/--- ##############################\n")
-    
-    modIwdSource = os.path.join(MOD_DIR, 'zm_tst1.iwd')
-    modIwdDest = os.path.join(ACTIVISION_MOD_DIR, 'zm_tst1.iwd')
+def copyModIwdFromModToActivisionMod(modDir: str, activisionModDir: str, printFunc=None) -> None:
+    modIwdSource = os.path.join(modDir, f'{modName}.iwd')
+    modIwdDest = os.path.join(activisionModDir, f'{modName}.iwd')
 
-    if not os.path.exists(ACTIVISION_MOD_DIR):
-        os.makedirs(ACTIVISION_MOD_DIR)
+    if not os.path.exists(activisionModDir):
+        os.makedirs(activisionModDir)
 
     shutil.copy2(modIwdSource, modIwdDest)
 
-    print(f"Copying  {modIwdSource}")
-    print(f"     to  {modIwdDest}")
+    printHandle = print if printFunc is None else printFunc
 
-    # print(f'\n############################## ---/--/--- ##############################')
-    # print(f'Copy mod.iwd end\n')
+    printHandle(f"Copying  {modIwdSource}")
+    printHandle(f"     to  {modIwdDest}")
 
-# Just a nice touch that the stock launcher has where it ensures the mod.ff is present in appdata/mods folder during the iwd stage.
-def copyModFfFromModToActivisionMod():
-    # print(f'\nCopy mod.ff start')
-    # print(f"############################## ---/--/--- ##############################\n")
+def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, printFunc=None) -> None:
+    # Just a nice touch that the stock launcher has where it ensures the mod.ff is present in appdata/mods folder during the iwd stage.
+    modFfSource = os.path.join(modDir, 'mod.ff')
+    modFfDest = os.path.join(activisionModDir, 'mod.ff')
 
-    if not os.path.exists(ACTIVISION_MOD_DIR):
-        os.makedirs(ACTIVISION_MOD_DIR)
-    
-    modFfSource = os.path.join(MOD_DIR, 'mod.ff')
-    modFfDest = os.path.join(ACTIVISION_MOD_DIR, 'mod.ff')
+    if not os.path.exists(activisionModDir):
+        os.makedirs(activisionModDir)
 
     # step 1: check if present in root/mods
     if os.path.exists(modFfSource):
@@ -201,40 +143,29 @@ def copyModFfFromModToActivisionMod():
 
             shutil.copy2(modFfSource, modFfDest)
 
-    print(f"Copying  {modFfSource}")
-    print(f"     to  {modFfDest}")
+    printHandle = print if printFunc is None else printFunc
 
-    # print(f'\n############################## ---/--/--- ##############################')
-    # print(f'Copy mod.ff end\n')
+    printHandle(f"Copying  {modFfSource}")
+    printHandle(f"     to  {modFfDest}")
 
-def teardown(message):
-    print(message)
+def teardown(message: str, printFunc=None) -> None:
+    print(message) if printFunc is None else printFunc(message)
     sys.exit(1)
 
-if __name__ == "__main__":
-    CLEAN = True  # print()  # adds a newline
-
-    # function calls
-    steps = [
-        # NOTE: Even though we're not using the stock 7za.exe anymore, may as well keep the output looking familiar.
-        lambda arg='7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14': print(arg),
-        lambda arg='Scanning': print(arg),
-        lambda arg=f'Creating archive {os.path.join(MOD_DIR, f'{MOD_NAME}.iwd')}': print(arg),
-
-        buildIwd,
-        copyModIwdFromModToActivisionMod,
-        copyModFfFromModToActivisionMod,
-        lambda arg='Everything is Ok': print(arg)
-    ]
+# Example usage
+if __name__ == '__main__':
+    # change these 2 as needed
+    modName = 'zm_test1'
+    wawRootDir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
 
     print()  # to separate from vs output
-
-    for step in steps:
-        try:
-            if CLEAN:
-                print()
-            step()
-        except Exception as error:
-            teardown(f"Step {step.__name__} failed: {error}")
-    
+    build(
+        modDir=os.path.join(os.path.join(wawRootDir, 'mods'), modName),
+        zoneSourceDir=os.path.join(wawRootDir, 'zone_source'),
+        modName=modName,
+        binDir=os.path.join(wawRootDir, 'bin'),
+        zoneEnglishDir=os.path.join(wawRootDir, 'zone', 'english'),
+        activisionModDir=os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'Activision', 'CoDWaW', 'mods', modName),  # '~' = home dir
+        printFunc=print
+    )
     print()  # to separate from vs output
