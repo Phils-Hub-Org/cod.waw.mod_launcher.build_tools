@@ -1,6 +1,6 @@
 name,file,platform,sequence,vol_min,vol_max,dist_min,dist_max,limit_count,limit_type,entity_limit_count,entity_limit_type,bus,volume_min_falloff_curve,volumefalloffcurve,reverb_send,dist_reverb_max,reverb_min_falloff_curve,reverb_falloff_curve,pitch_min,pitch_max,randomize_type,spatialized,type,probability,loop,masterslave,loadspec,subtitle,compression,secondaryaliasname,chainaliasname,startdelay,speakermap,lfe percentage,center percentage,envelop_min,envelop_max,envelop percentage,occlusion_level,occlusion_wet_dry,real_delay,distance_lpf,move_type,move_time,min_priority,max_priority,min_priority_threshold,max_priority_threshold,,isbig
 # Custom sounds building - 'sound,custom_sound,,all_sp' in mod_builder.csv
-# computerized_sfx: soundalias (use in .gsc like playsound("computerized_sfx");)
+# computerized_sfx: soundalias (use in .gsc like playsound('computerized_sfx');)
 # custom\computerized.wav: folder\file
 # You can safely use this file as a placeholder in order to build your new custom sound, just be sure to change the 'folder\file' to match yours.
 computerized_sfx,custom\computerized.wav,,,1,1,,,,,,,full_vol,,,0.8,,,,1,1,,2d,,,,,,,,,,,wpn_fnt,0.2,1,,,,,,,,,,90,90,0.25,1,,
