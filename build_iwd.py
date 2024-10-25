@@ -72,7 +72,7 @@ import os, sys, shutil, zipfile
 
 WAW_ROOT_DIR = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
 MODS_DIR = os.path.join(WAW_ROOT_DIR, 'mods')
-MOD_NAME = 'zm_tst1'
+MOD_NAME = 'mp_test7'
 MOD_DIR = os.path.join(MODS_DIR, MOD_NAME)
 
 homeDir = os.path.expanduser('~')
