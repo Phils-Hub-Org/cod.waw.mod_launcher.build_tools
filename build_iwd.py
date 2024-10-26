@@ -31,7 +31,6 @@ def build(
     outputHandle('Scanning')
     outputHandle(f'\nCreating archive {os.path.join(modDir, f'{modName}.iwd')}\n')
 
-    # function calls
     steps = [
         lambda arg1=modDir, arg2=modName, arg3=foldersToIgnore, arg4=filesToIgnore, arg5=outputHandle: buildIwd(arg1, arg2, arg3, arg4, arg5),
         lambda arg1=modName, arg2=modDir, arg3=activisionModDir, arg4=outputHandle: copyModIwdFromModToActivisionMod(arg1, arg2, arg3, arg4),
@@ -66,9 +65,8 @@ def build(
         return
 
     if not stepFailure:
-        outputHandle('Everything is Ok')
         if onProgramSuccessHandle:
-            onProgramSuccessHandle('Program finished with no errors')
+            onProgramSuccessHandle('Everything is Ok')
 
 def buildIwd(modDir: str, modName: str, foldersToIgnore: list, filesToIgnore: list, outputHandle=print) -> None:
     # Anything to be built into the modname.iwd will need its full mod dir path (exluding leading up to mod root).
@@ -90,10 +88,6 @@ def buildIwd(modDir: str, modName: str, foldersToIgnore: list, filesToIgnore: li
 
     array = sorted(array)  # sort in ascending order
 
-    # # Fake interruption (imitates user interruption)
-    # i = 0
-    # # Fake interruption (imitates user interruption)
-
     for item in array:
         # Add the file (item) to the zip archive
         with zipfile.ZipFile(iwdDest, 'a', zipfile.ZIP_DEFLATED) as zipf:  # 'a' for append, just be sure to delete old iwd first
@@ -112,14 +106,6 @@ def buildIwd(modDir: str, modName: str, foldersToIgnore: list, filesToIgnore: li
             
             # Add the file to the zip archive
             zipf.write(file_to_add, file_in_iwd)
-        
-        # # Fake interruption (imitates user interruption)
-        # global processInterrupted
-        # print(f'i: {i}')
-        # i += 1
-        # if i == 2:
-        #     processInterrupted = True
-        # # Fake interruption (imitates user interruption)
 
         if processInterrupted:
             break
@@ -192,6 +178,10 @@ def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, outputHa
         outputHandle(f'              to  {modFfDest}')
         outputHandle('          Reason  mod.ff not present')
 
+def interruptProcessHandle() -> None:
+    global processInterrupted
+    processInterrupted = True
+
 # Example usage
 if __name__ == '__main__':
     # change these 2 as needed
@@ -200,17 +190,22 @@ if __name__ == '__main__':
     mod_name = 'zm_tst1'
     waw_root_dir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
 
+    # Feel free to copy/paste these functions into your own script.
     def outputHandleExample(message: str) -> None:
         print(message)
     
     def onProgramSuccessHandleExample(message: str) -> None:
-        print(message)
+        print(f'On program success: {message}')
 
     def onProgramFailureHandleExample(message: str) -> None:
         print(f'On program failure: {message}')
     
     def onProcessInterruptedHandleExample(message: str) -> None:
         print(f'On process interrupted: {message}')
+    
+    # Imitates user interruption
+    # import threading, time
+    # threading.Thread(target=lambda: (time.sleep(0.1), interruptProcessHandle())).start()
 
     print()  # to separate from vs output
     build(

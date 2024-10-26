@@ -24,7 +24,7 @@ def build(
         onProcessInterruptedHandle=None,
         addSpaceBetweenSteps=False
     ) -> None:
-    # function calls
+    
     steps = [
         lambda arg1=binDir, arg2=outputHandle: buildSounds(arg1, arg2),
     ]
@@ -55,9 +55,8 @@ def build(
         return
 
     if not stepFailure:
-        outputHandle('Everything is Ok')
         if onProgramSuccessHandle:
-            onProgramSuccessHandle('Program finished with no errors')
+            onProgramSuccessHandle('Everything is Ok')
 
 def buildSounds(binDir: str, outputHandle=print) -> None:
     args = ['MODSound', '-pc', '-ignore_orphans']
@@ -72,10 +71,6 @@ def buildSounds(binDir: str, outputHandle=print) -> None:
         text=True  # Enable text mode for easier string handling
     )
 
-    # Fake interruption (imitates user interruption)
-    i = 0
-    # Fake interruption (imitates user interruption)
-
     # Read stdout and stderr in real time
     while True:
         output = process.stdout.readline()
@@ -83,14 +78,6 @@ def buildSounds(binDir: str, outputHandle=print) -> None:
             break
         if output:
             outputHandle(output.strip())
-        
-        # # Fake interruption (imitates user interruption)
-        # global processInterrupted
-        # print(f'i: {i}')
-        # i += 1
-        # if i == 2:
-        #     processInterrupted = True
-        # # Fake interruption (imitates user interruption)
     
         if processInterrupted:  # user interrupted
             process.kill()
@@ -101,7 +88,11 @@ def buildSounds(binDir: str, outputHandle=print) -> None:
     if stderr:
         outputHandle(stderr.strip())
 
-# Example usage
+def interruptProcessHandle() -> None:
+    global processInterrupted
+    processInterrupted = True
+
+# Example usage (below is an example of exactly how to utilize this module in your own script).
 if __name__ == '__main__':
     # change these 2 as needed
     # NOTE: Be careful with variables that are in global scope like the below 2.
@@ -109,17 +100,22 @@ if __name__ == '__main__':
     waw_root_dir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War' 
     bin_dir = os.path.join(waw_root_dir, 'bin')
 
+    # Feel free to copy/paste these functions into your own script.
     def outputHandleExample(message: str) -> None:
         print(message)
     
     def onProgramSuccessHandleExample(message: str) -> None:
-        print(message)
+        print(f'On program success: {message}')
 
     def onProgramFailureHandleExample(message: str) -> None:
         print(f'On program failure: {message}')
     
     def onProcessInterruptedHandleExample(message: str) -> None:
         print(f'On process interrupted: {message}')
+    
+    # Imitates user interruption
+    # import threading, time
+    # threading.Thread(target=lambda: (time.sleep(0.1), interruptProcessHandle())).start()
 
     print()  # to separate from vs output
     build(

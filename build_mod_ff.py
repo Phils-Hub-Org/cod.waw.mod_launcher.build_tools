@@ -18,18 +18,19 @@ For console output refer to: 'Misc/building-mod.ff-output.txt'
 """
 
 import os, csv, shutil, subprocess
+from typing import Callable, Optional
 
 stepFailure = False
 processInterrupted = False
 
 def build(
         modDir: str, zoneSourceDir: str, modName: str, binDir: str, zoneEnglishDir: str, activisionModDir: str,
-        outputHandle=print, warningOutputHandle=print, errorOutputHandle=print,
+        outputHandle=print, warningOutputHandle=None, errorOutputHandle=None,
         onProgramSuccessHandle=None, onProgramFailureHandle=None,
         onProcessInterruptedHandle=None,
         addSpaceBetweenSteps=False
     ) -> None:
-    # function calls
+    
     steps = [
         lambda arg1=modDir, arg2=zoneSourceDir, arg3=outputHandle: copyModCsvFromModToZoneSource(arg1, arg2, arg3),
         lambda arg1=modName, arg2=binDir, arg3=outputHandle, arg4=warningOutputHandle, arg5=errorOutputHandle: buildModFf(arg1, arg2, arg3, arg4, arg5),
@@ -68,11 +69,10 @@ def build(
         return
 
     if not stepFailure:
-        outputHandle('Everything is Ok')
         if onProgramSuccessHandle:
-            onProgramSuccessHandle('Program finished with no errors')
+            onProgramSuccessHandle('Everything is Ok')
 
-def copyModCsvFromModToZoneSource(modDir: str, zoneSourceDir: str, outputHandle=print) -> None:
+def copyModCsvFromModToZoneSource(modDir: str, zoneSourceDir: str, outputHandle: callable) -> None:
     mod_csv_path = os.path.join(modDir, 'mod.csv')
 
     # Check if the file exists (this would usually be handled by the mod launcher)
@@ -89,7 +89,7 @@ def copyModCsvFromModToZoneSource(modDir: str, zoneSourceDir: str, outputHandle=
     outputHandle(f'Copying  {mod_csv_path}')
     outputHandle(f'     to  {zone_source_path}')
 
-def buildModFf(modName: str, binDir: str, outputHandle=print, warningOutputHandle=print, errorOutputHandle=print) -> None:
+def buildModFf(modName: str, binDir: str, outputHandle: callable, warningOutputHandle: Optional[Callable], errorOutputHandle: Optional[Callable]) -> None:
     args = ['linker_pc', '-nopause', '-language', 'english', '-moddir', modName, 'mod']
 
     # Use Popen to run the linker asynchronously
@@ -102,10 +102,6 @@ def buildModFf(modName: str, binDir: str, outputHandle=print, warningOutputHandl
         text=True  # Enable text mode for easier string handling
     )
 
-    # # Fake interruption (imitates user interruption)
-    # i = 0
-    # # Fake interruption (imitates user interruption)
-
     # Read stdout and stderr in real time
     while True:
         output = process.stdout.readline()
@@ -115,17 +111,11 @@ def buildModFf(modName: str, binDir: str, outputHandle=print, warningOutputHandl
             output = output.strip()
             outputHandle(output)
             if output.startswith('WARNING:'):
-                warningOutputHandle(output)
+                if warningOutputHandle:
+                    warningOutputHandle(output)
             elif output.startswith('ERROR:'):
-                errorOutputHandle(output)
-        
-        # # Fake interruption (imitates user interruption)
-        # global processInterrupted
-        # print(f'i: {i}')
-        # i += 1
-        # if i == 2:
-        #     processInterrupted = True
-        # # Fake interruption (imitates user interruption)
+                if errorOutputHandle:
+                    errorOutputHandle(output)
     
         if processInterrupted:  # user interrupted
             process.kill()
@@ -136,7 +126,7 @@ def buildModFf(modName: str, binDir: str, outputHandle=print, warningOutputHandl
     if stderr:
         outputHandle(stderr.strip())
 
-def moveModFfFromZoneEnglishToMod(zoneEnglishDir: str, modDir: str, outputHandle=print) -> None:
+def moveModFfFromZoneEnglishToMod(zoneEnglishDir: str, modDir: str, outputHandle: callable) -> None:
     modFfSource = os.path.join(zoneEnglishDir, 'mod.ff')
     modFfDest = os.path.join(modDir, 'mod.ff')
 
@@ -145,7 +135,7 @@ def moveModFfFromZoneEnglishToMod(zoneEnglishDir: str, modDir: str, outputHandle
     outputHandle(f'Moving  {modFfSource}')
     outputHandle(f'    to  {modFfDest}')
 
-def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, outputHandle=print) -> None:
+def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, outputHandle: callable) -> None:
     if not os.path.exists(activisionModDir):
         os.makedirs(activisionModDir)
 
@@ -157,7 +147,7 @@ def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, outputHa
     outputHandle(f'Copying  {modFfSource}')
     outputHandle(f'     to  {modFfDest}')
 
-def copyIwdFromModToActivisionMod(activisionModDir: str, modDir: str, modName: str, outputHandle=print) -> None:
+def copyIwdFromModToActivisionMod(activisionModDir: str, modDir: str, modName: str, outputHandle: callable) -> None:
     # Just a nice touch that the stock launcher has where it ensures the modName.iwd is present in appdata/mods folder during the mod.ff stage.
     
     if not os.path.exists(activisionModDir):
@@ -187,6 +177,10 @@ def copyIwdFromModToActivisionMod(activisionModDir: str, modDir: str, modName: s
         outputHandle(f'              to  {modIwdDest}')
         outputHandle('          Reason  iwd not present')
 
+def interruptProcessHandle() -> None:
+    global processInterrupted
+    processInterrupted = True
+
 # Example usage
 if __name__ == '__main__':
     # change these 2 as needed
@@ -195,6 +189,7 @@ if __name__ == '__main__':
     mod_name = 'zm_tst1'
     waw_root_dir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
 
+    # Feel free to copy/paste these functions into your own script.
     def outputHandleExample(message: str) -> None:
         print(message)
     
@@ -205,13 +200,17 @@ if __name__ == '__main__':
         print(f'Captured error: {message}')
     
     def onProgramSuccessHandleExample(message: str) -> None:
-        print(message)
+        print(f'On program success: {message}')
 
     def onProgramFailureHandleExample(message: str) -> None:
         print(f'On program failure: {message}')
     
     def onProcessInterruptedHandleExample(message: str) -> None:
         print(f'On process interrupted: {message}')
+
+    # Imitates user interruption
+    # import threading, time
+    # threading.Thread(target=lambda: (time.sleep(0.1), interruptProcessHandle())).start()
 
     print()  # to separate from vs output
     build(
@@ -222,8 +221,8 @@ if __name__ == '__main__':
         zoneEnglishDir=os.path.join(waw_root_dir, 'zone', 'english'),
         activisionModDir=os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'Activision', 'CoDWaW', 'mods', mod_name),  # '~' = home dir
         # outputHandle=outputHandleExample,  # uses print by default
-        warningOutputHandle=warningOutputHandleExample,  # looks for a specific output marker: 'WARNING:'
-        errorOutputHandle=errorOutputHandleExample,  # looks for a specific output marker: 'ERROR:'
+        # warningOutputHandle=warningOutputHandleExample,  # looks for a specific output marker: 'WARNING:'
+        # errorOutputHandle=errorOutputHandleExample,  # looks for a specific output marker: 'ERROR:'
         onProgramSuccessHandle=onProgramSuccessHandleExample,
         onProgramFailureHandle=onProgramFailureHandleExample,
         onProcessInterruptedHandle=onProcessInterruptedHandleExample,
