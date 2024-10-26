@@ -14,12 +14,14 @@ import os, shutil, zipfile, platform
 from datetime import datetime
 
 stepFailure = False
+processInterrupted = False
 
 def build(
         modName: str, modDir: str, activisionModDir: str,
         foldersToIgnore: list=[], filesToIgnore: list=[],
         outputHandle=print,
-        onProgramFailureHandle=None, onProgramSuccessHandle=None,
+        onProgramSuccessHandle=None, onProgramFailureHandle=None,
+        onProcessInterruptedHandle=None,
         addSpaceBetweenSteps=False
     ) -> None:
     # NOTE: Even though we're not using the stock 7za.exe anymore, may as well keep the output looking familiar.
@@ -47,6 +49,8 @@ def build(
     for step in steps:
         if stepFailure:
             break
+        if processInterrupted:
+            break
         try:
             step()
             if addSpaceBetweenSteps:
@@ -56,6 +60,11 @@ def build(
             if onProgramFailureHandle:
                 onProgramFailureHandle(f'Step {step.__name__} failed: {error}')
     
+    if processInterrupted:
+        if onProcessInterruptedHandle:
+            onProcessInterruptedHandle('Process was interrupted by the user')
+        return
+
     if not stepFailure:
         outputHandle('Everything is Ok')
         if onProgramSuccessHandle:
@@ -81,7 +90,12 @@ def buildIwd(modDir: str, modName: str, foldersToIgnore: list, filesToIgnore: li
 
     array = sorted(array)  # sort in ascending order
 
-    for item in array:        
+    # # Fake interruption (imitates user interruption)
+    # i = 0
+    # # Fake interruption (imitates user interruption)
+
+    for item in array:
+        # Add the file (item) to the zip archive
         with zipfile.ZipFile(iwdDest, 'a', zipfile.ZIP_DEFLATED) as zipf:  # 'a' for append, just be sure to delete old iwd first
             # Specify files and where you want them in the .iwd archive
             # For example, placing a specific file in the 'aitype' folder inside the iwd
@@ -98,6 +112,17 @@ def buildIwd(modDir: str, modName: str, foldersToIgnore: list, filesToIgnore: li
             
             # Add the file to the zip archive
             zipf.write(file_to_add, file_in_iwd)
+        
+        # # Fake interruption (imitates user interruption)
+        # global processInterrupted
+        # print(f'i: {i}')
+        # i += 1
+        # if i == 2:
+        #     processInterrupted = True
+        # # Fake interruption (imitates user interruption)
+
+        if processInterrupted:
+            break
 
 # Utilized by: buildIwd()
 def grabModStructure(rootDir: str=os.getcwd(), foldersToIgnore: list=[], filesToIgnore: list=[]) -> dict:
@@ -183,6 +208,9 @@ if __name__ == '__main__':
 
     def onProgramFailureHandleExample(message: str) -> None:
         print(f'On program failure: {message}')
+    
+    def onProcessInterruptedHandleExample(message: str) -> None:
+        print(f'On process interrupted: {message}')
 
     print()  # to separate from vs output
     build(
@@ -201,6 +229,7 @@ if __name__ == '__main__':
         # outputHandle=outputHandleExample,  # uses print by default
         onProgramSuccessHandle=onProgramSuccessHandleExample,
         onProgramFailureHandle=onProgramFailureHandleExample,
+        onProcessInterruptedHandle=onProcessInterruptedHandleExample,
         addSpaceBetweenSteps=True
     )
     print()  # to separate from vs output

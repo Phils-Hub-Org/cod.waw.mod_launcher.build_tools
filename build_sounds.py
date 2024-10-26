@@ -15,11 +15,13 @@ For console output refer to: 'Misc/building-sounds-info.txt'
 import os, subprocess
 
 stepFailure = False
+processInterrupted = False
 
 def build(
         binDir: str,
         outputHandle=print,
-        onProgramFailureHandle=None, onProgramSuccessHandle=None,
+        onProgramSuccessHandle=None, onProgramFailureHandle=None,
+        onProcessInterruptedHandle=None,
         addSpaceBetweenSteps=False
     ) -> None:
     # function calls
@@ -36,6 +38,8 @@ def build(
     for step in steps:
         if stepFailure:
             break
+        if processInterrupted:
+            break
         try:
             step()
             if addSpaceBetweenSteps:
@@ -45,6 +49,11 @@ def build(
             if onProgramFailureHandle:
                 onProgramFailureHandle(f'Step {step.__name__} failed: {error}')
     
+    if processInterrupted:
+        if onProcessInterruptedHandle:
+            onProcessInterruptedHandle('Process was interrupted by the user')
+        return
+
     if not stepFailure:
         outputHandle('Everything is Ok')
         if onProgramSuccessHandle:
@@ -63,6 +72,10 @@ def buildSounds(binDir: str, outputHandle=print) -> None:
         text=True  # Enable text mode for easier string handling
     )
 
+    # Fake interruption (imitates user interruption)
+    i = 0
+    # Fake interruption (imitates user interruption)
+
     # Read stdout and stderr in real time
     while True:
         output = process.stdout.readline()
@@ -70,6 +83,18 @@ def buildSounds(binDir: str, outputHandle=print) -> None:
             break
         if output:
             outputHandle(output.strip())
+        
+        # # Fake interruption (imitates user interruption)
+        # global processInterrupted
+        # print(f'i: {i}')
+        # i += 1
+        # if i == 2:
+        #     processInterrupted = True
+        # # Fake interruption (imitates user interruption)
+    
+        if processInterrupted:  # user interrupted
+            process.kill()
+            return
 
     # Capture the stderr output after the process finishes
     stderr = process.stderr.read()
@@ -92,6 +117,9 @@ if __name__ == '__main__':
 
     def onProgramFailureHandleExample(message: str) -> None:
         print(f'On program failure: {message}')
+    
+    def onProcessInterruptedHandleExample(message: str) -> None:
+        print(f'On process interrupted: {message}')
 
     print()  # to separate from vs output
     build(
@@ -99,6 +127,7 @@ if __name__ == '__main__':
         # outputHandle=outputHandleExample,  # uses print by default
         onProgramSuccessHandle=onProgramSuccessHandleExample,
         onProgramFailureHandle=onProgramFailureHandleExample,
+        onProcessInterruptedHandle=onProcessInterruptedHandleExample,
         addSpaceBetweenSteps=True
     )
     print()  # to separate from vs output
