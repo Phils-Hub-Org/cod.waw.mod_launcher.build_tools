@@ -7,32 +7,61 @@
     The default stock mod launcher behaviour is to copy mod.ff to appdata/mods folder if it is not present there during the iwd stage.
     So this module does take care of that, but for the actual building of the mod.ff, check out the 'build_mod_ff.py' module.
 
-For output information refer to: 'Misc/building-iwd-info.txt'
+For console output refer to: 'Misc/building-iwd-info.txt'
 """
 
-import os, sys, shutil, zipfile
+import os, shutil, zipfile, platform
+from datetime import datetime
 
-def build(modName: str, modDir: str, activisionModDir: str, foldersToIgnore: list=[], filesToIgnore: list=[], printFunc=print) -> None:
+stepFailure = False
+
+def build(
+        modName: str, modDir: str, activisionModDir: str,
+        foldersToIgnore: list=[], filesToIgnore: list=[],
+        outputHandle=print,
+        onProgramFailureHandle=None, onProgramSuccessHandle=None,
+        addSpaceBetweenSteps=False
+    ) -> None:
+    # NOTE: Even though we're not using the stock 7za.exe anymore, may as well keep the output looking familiar.
+    # outputHandle('7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14')
+    outputHandle(f'Python zipfile (P) {platform.python_version()}')
+    outputHandle(f'Copyright (c) 2001-{datetime.now().year} Python Software Foundation')
+    outputHandle('Scanning')
+    outputHandle(f'\nCreating archive {os.path.join(modDir, f'{modName}.iwd')}\n')
+
     # function calls
     steps = [
-        # NOTE: Even though we're not using the stock 7za.exe anymore, may as well keep the output looking familiar.
-        lambda arg1='7-Zip (A) 4.42  Copyright (c) 1999-2006 Igor Pavlov  2006-05-14': printFunc(arg1),
-        lambda arg1='Scanning': printFunc(arg1),
-        lambda arg1=f'Creating archive {os.path.join(modDir, f'{modName}.iwd')}': printFunc(arg1),
-
-        lambda arg1=modDir, arg2=modName, arg3=foldersToIgnore, arg4=filesToIgnore, arg5=printFunc: buildIwd(arg1, arg2, arg3, arg4, arg5),
-        lambda arg1=modName, arg2=modDir, arg3=activisionModDir, arg4=printFunc: copyModIwdFromModToActivisionMod(arg1, arg2, arg3, arg4),
-        lambda arg1=activisionModDir, arg2=modDir, arg3=printFunc: copyModFfFromModToActivisionMod(arg1, arg2, arg3),
-        lambda arg1='Everything is Ok': printFunc(arg1),
+        lambda arg1=modDir, arg2=modName, arg3=foldersToIgnore, arg4=filesToIgnore, arg5=outputHandle: buildIwd(arg1, arg2, arg3, arg4, arg5),
+        lambda arg1=modName, arg2=modDir, arg3=activisionModDir, arg4=outputHandle: copyModIwdFromModToActivisionMod(arg1, arg2, arg3, arg4),
+        lambda arg1=activisionModDir, arg2=modDir, arg3=outputHandle: copyModFfFromModToActivisionMod(arg1, arg2, arg3),
     ]
 
+    # lambda's are anonymous functions, so we need to assign the function names manually
+    # when not using lambda, the below '{step.__name__}' would work perfectly fine.
+    steps[0].__name__ = 'build_iwd_step'
+    steps[1].__name__ = 'copy_mod_iwd_step'
+    steps[2].__name__ = 'copy_mod_ff_step'
+
+    global stepFailure
+
     for step in steps:
+        if stepFailure:
+            break
         try:
             step()
+            if addSpaceBetweenSteps:
+                outputHandle('\n'.strip())  # it adds 2 newlines w/o .strip()
         except Exception as error:
-            teardown(message=f"Step {step.__name__} failed: {error}", printFunc=printFunc)
+            stepFailure = True
+            if onProgramFailureHandle:
+                onProgramFailureHandle(f'Step {step.__name__} failed: {error}')
+    
+    if not stepFailure:
+        outputHandle('Everything is Ok')
+        if onProgramSuccessHandle:
+            onProgramSuccessHandle('Program finished with no errors')
 
-def buildIwd(modDir: str, modName: str, foldersToIgnore: list, filesToIgnore: list, printFunc=print) -> None:
+def buildIwd(modDir: str, modName: str, foldersToIgnore: list, filesToIgnore: list, outputHandle=print) -> None:
     # Anything to be built into the modname.iwd will need its full mod dir path (exluding leading up to mod root).
     array = []
 
@@ -42,7 +71,7 @@ def buildIwd(modDir: str, modName: str, foldersToIgnore: list, filesToIgnore: li
         filesToIgnore=filesToIgnore
     )
 
-    iterateFiles(data=itemsToPkgIntoIwd, action=lambda x: array.append(x), printFunc=printFunc)
+    iterateFiles(data=itemsToPkgIntoIwd, action=lambda x: array.append(x), outputHandle=outputHandle)
 
     iwdDest = os.path.join(modDir, f'{modName}.iwd')
 
@@ -65,7 +94,7 @@ def buildIwd(modDir: str, modName: str, foldersToIgnore: list, filesToIgnore: li
             file_in_iwd = item
             # file_in_iwd = 'aitype/axis_zombie_ger_ber_sshonor.gsc'
 
-            printFunc(f'Compressing  {item}')
+            outputHandle(f'Compressing  {item}')
             
             # Add the file to the zip archive
             zipf.write(file_to_add, file_in_iwd)
@@ -88,16 +117,16 @@ def grabModStructure(rootDir: str=os.getcwd(), foldersToIgnore: list=[], filesTo
     return structure
 
 # Utilized by: buildIwd()
-def iterateFiles(data: dict, action: callable=None, printFunc=print, parent: str='') -> None:
+def iterateFiles(data: dict, action: callable=None, outputHandle=print, parent: str='') -> None:
     for key, value in data.items():
-        current_path = f"{parent}/{key}" if parent else key  # Join parent with current folder/file
+        current_path = f'{parent}/{key}' if parent else key  # Join parent with current folder/file
         if isinstance(value, dict):  # If value is a dictionary, recurse
-            iterateFiles(data=value, action=action, printFunc=printFunc, parent=current_path)
+            iterateFiles(data=value, action=action, outputHandle=outputHandle, parent=current_path)
         else:  # If it's a file (None in this case), print the path
             if action:
                 action(current_path)
 
-def copyModIwdFromModToActivisionMod(modName: str, modDir: str, activisionModDir: str, printFunc=print) -> None:
+def copyModIwdFromModToActivisionMod(modName: str, modDir: str, activisionModDir: str, outputHandle=print) -> None:
     modIwdSource = os.path.join(modDir, f'{modName}.iwd')
     modIwdDest = os.path.join(activisionModDir, f'{modName}.iwd')
 
@@ -106,10 +135,10 @@ def copyModIwdFromModToActivisionMod(modName: str, modDir: str, activisionModDir
 
     shutil.copy2(modIwdSource, modIwdDest)
 
-    printFunc(f"Copying  {modIwdSource}")
-    printFunc(f"     to  {modIwdDest}")
+    outputHandle(f'Copying  {modIwdSource}')
+    outputHandle(f'     to  {modIwdDest}')
 
-def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, printFunc=print) -> None:
+def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, outputHandle=print) -> None:
     # Just a nice touch that the stock launcher has where it ensures the mod.ff is present in appdata/mods folder during the iwd stage.
     modFfSource = os.path.join(modDir, 'mod.ff')
     modFfDest = os.path.join(activisionModDir, 'mod.ff')
@@ -127,20 +156,33 @@ def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, printFun
 
             shutil.copy2(modFfSource, modFfDest)
 
-            printFunc(f"Copying  {modFfSource}")
-            printFunc(f"     to  {modFfDest}")
-
-def teardown(message: str='[build_iwd.py]: Something went wrong...', printFunc=print) -> None:
-    printFunc(message)
-    sys.exit(1)
+            outputHandle(f'Copying  {modFfSource}')
+            outputHandle(f'     to  {modFfDest}')
+        else:
+            outputHandle(f'Skipping copying  {modFfSource}')
+            outputHandle(f'              to  {modFfDest}')
+            outputHandle('          Reason  mod.ff already present')
+    else:
+        outputHandle(f'Skipping copying  {modFfSource}')
+        outputHandle(f'              to  {modFfDest}')
+        outputHandle('          Reason  mod.ff not present')
 
 # Example usage
 if __name__ == '__main__':
     # change these 2 as needed
     # NOTE: Be careful with variables that are in global scope like the below 2.
-    #       I change their styling from the args styling so function couldn't utilize them as they should be passed in as args.
-    mod_name = 'zm_test1'
-    waw_root_dir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'    
+    #       I changed their styling from the args styling so functions couldn't access them unless passed as args.
+    mod_name = 'zm_tst2'
+    waw_root_dir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
+
+    def outputHandleExample(message: str) -> None:
+        print(message)
+    
+    def onProgramSuccessHandleExample(message: str) -> None:
+        print(message)
+
+    def onProgramFailureHandleExample(message: str) -> None:
+        print(f'On program failure: {message}')
 
     print()  # to separate from vs output
     build(
@@ -156,6 +198,9 @@ if __name__ == '__main__':
             f'{mod_name}.iwd',
             'console.log',
         ],
-        # printFunc=print  # the build func already utilizes print as the default output, so only use this arg when wanting to handle the output differently.
+        # outputHandle=outputHandleExample,  # uses print by default
+        onProgramSuccessHandle=onProgramSuccessHandleExample,
+        onProgramFailureHandle=onProgramFailureHandleExample,
+        addSpaceBetweenSteps=True
     )
     print()  # to separate from vs output
