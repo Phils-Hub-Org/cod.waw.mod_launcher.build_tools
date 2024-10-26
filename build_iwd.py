@@ -129,7 +129,7 @@ def grabModStructure(rootDir: str=os.getcwd(), foldersToIgnore: list=[], filesTo
     return structure
 
 # Utilized by: buildIwd()
-def iterateFiles(data: dict, action: callable=None, outputHandle=print, parent: str='') -> None:
+def iterateFiles(data: dict, action: Callable=None, outputHandle=print, parent: str='') -> None:
     for key, value in data.items():
         current_path = f'{parent}/{key}' if parent else key  # Join parent with current folder/file
         if isinstance(value, dict):  # If value is a dictionary, recurse
