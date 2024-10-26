@@ -193,16 +193,16 @@ if __name__ == '__main__':
     waw_root_dir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
 
     # Feel free to copy/paste these functions into your own script.
-    def buildOutputHandleSlot(message: str) -> None:
+    def buildIWDOutputHandleSlot(message: str) -> None:
         print(f'Captured output: {message}')
     
-    def buildSuccessHandleSlot(message: str) -> None:
+    def buildIWDSuccessHandleSlot(message: str) -> None:
         print(f'On program success: {message}')
 
-    def buildFailureHandleSlot(message: str) -> None:
+    def buildIWDFailureHandleSlot(message: str) -> None:
         print(f'On program failure: {message}')
     
-    def buildInterruptedHandleSlot(message: str) -> None:
+    def buildIWDInterruptedHandleSlot(message: str) -> None:
         print(f'On process interrupted: {message}')
     
     # Imitates user interruption (just uncomment, adjust the delay and its good to go!).
@@ -232,10 +232,10 @@ if __name__ == '__main__':
             '.files',
         ],
         ### These are all optional args and can be changed ###
-        # buildOutputHandle=buildOutputHandleSlot,  # uses print by default
-        buildSuccessHandle=buildSuccessHandleSlot,
-        buildFailureHandle=buildFailureHandleSlot,
-        buildInterruptedHandle=buildInterruptedHandleSlot,
-        # addSpaceBetweenSteps=True
+        # buildOutputHandle=buildIWDOutputHandleSlot,  # uses print by default
+        buildSuccessHandle=buildIWDSuccessHandleSlot,
+        buildFailureHandle=buildIWDFailureHandleSlot,
+        buildInterruptedHandle=buildIWDInterruptedHandleSlot,
+        addSpaceBetweenSteps=True
     )
     print()  # to separate from vs output

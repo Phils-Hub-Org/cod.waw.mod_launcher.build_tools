@@ -101,16 +101,16 @@ if __name__ == '__main__':
     bin_dir = os.path.join(waw_root_dir, 'bin')
 
     # Feel free to copy/paste these functions into your own script.
-    def buildOutputHandleSlot(message: str) -> None:
+    def buildSoundOutputHandleSlot(message: str) -> None:
         print(f'Captured output: {message}')
     
-    def buildSuccessHandleSlot(message: str) -> None:
+    def buildSoundSuccessHandleSlot(message: str) -> None:
         print(f'On program success: {message}')
 
-    def buildFailureHandleSlot(message: str) -> None:
+    def buildSoundFailureHandleSlot(message: str) -> None:
         print(f'On program failure: {message}')
     
-    def buildInterruptedHandleSlot(message: str) -> None:
+    def buildSoundInterruptedHandleSlot(message: str) -> None:
         print(f'On process interrupted: {message}')
     
     # Imitates user interruption (just uncomment, adjust the delay and its good to go!).
@@ -123,10 +123,10 @@ if __name__ == '__main__':
         binDir=bin_dir,
 
         ### These are all optional args and can be changed ###
-        # outputHandle=outputHandleExample,  # uses print by default
-        buildSuccessHandle=buildSuccessHandleSlot,
-        buildFailureHandle=buildFailureHandleSlot,
-        buildInterruptedHandle=buildInterruptedHandleSlot,
+        # outputHandle=buildSoundOutputHandleSlot,  # uses print by default
+        buildSuccessHandle=buildSoundSuccessHandleSlot,
+        buildFailureHandle=buildSoundFailureHandleSlot,
+        buildInterruptedHandle=buildSoundInterruptedHandleSlot,
         addSpaceBetweenSteps=True
     )
     print()  # to separate from vs output
