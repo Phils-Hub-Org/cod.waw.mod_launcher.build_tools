@@ -172,7 +172,7 @@ if __name__ == '__main__':
     # change these 2 as needed
     # NOTE: Be careful with variables that are in global scope like the below 2.
     #       I changed their styling from the args styling so functions couldn't access them unless passed as args.
-    mod_name = 'zm_tst2'
+    mod_name = 'zm_tst1'
     waw_root_dir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
 
     def outputHandleExample(message: str) -> None:
