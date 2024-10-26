@@ -214,7 +214,7 @@ if __name__ == '__main__':
 
     print()  # to separate from vs output
     build(
-        modDir=os.path.join(os.path.join(waw_root_dir, 'mods'), mod_name),
+        modDir=os.path.join(waw_root_dir, 'mods', mod_name),
         zoneSourceDir=os.path.join(waw_root_dir, 'zone_source'),
         modName=mod_name,
         binDir=os.path.join(waw_root_dir, 'bin'),

@@ -211,7 +211,7 @@ if __name__ == '__main__':
     print()  # to separate from vs output
     build(
         modName=mod_name,
-        modDir=os.path.join(os.path.join(waw_root_dir, 'mods'), mod_name),
+        modDir=os.path.join(waw_root_dir, 'mods', mod_name),
         activisionModDir=os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'Activision', 'CoDWaW', 'mods', mod_name),  # '~' = home dir
         foldersToIgnore=[
             'sound',
