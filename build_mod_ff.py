@@ -25,9 +25,9 @@ processInterrupted = False
 
 def build(
         modDir: str, zoneSourceDir: str, modName: str, binDir: str, zoneEnglishDir: str, activisionModDir: str,
-        outputHandle=print, warningOutputHandle=None, errorOutputHandle=None,
-        onProgramSuccessHandle=None, onProgramFailureHandle=None,
-        onProcessInterruptedHandle=None,
+        outputHandle=print, warningOutputHandle: Optional[Callable]=None, errorOutputHandle: Optional[Callable]=None,
+        onProgramSuccessHandle: Optional[Callable]=None, onProgramFailureHandle: Optional[Callable]=None,
+        onProcessInterruptedHandle: Optional[Callable]=None,
         addSpaceBetweenSteps=False
     ) -> None:
     
@@ -208,7 +208,7 @@ if __name__ == '__main__':
     def onProcessInterruptedHandleExample(message: str) -> None:
         print(f'On process interrupted: {message}')
 
-    # Imitates user interruption
+    # Imitates user interruption (just uncomment, adjust the delay and its good to go!).
     # import threading, time
     # threading.Thread(target=lambda: (time.sleep(0.1), interruptProcessHandle())).start()
 

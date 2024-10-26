@@ -12,6 +12,7 @@ For console output refer to: 'Misc/building-iwd-info.txt'
 
 import os, shutil, zipfile, platform
 from datetime import datetime
+from typing import Callable, Optional
 
 stepFailure = False
 processInterrupted = False
@@ -20,8 +21,8 @@ def build(
         modName: str, modDir: str, activisionModDir: str,
         foldersToIgnore: list=[], filesToIgnore: list=[],
         outputHandle=print,
-        onProgramSuccessHandle=None, onProgramFailureHandle=None,
-        onProcessInterruptedHandle=None,
+        onProgramSuccessHandle: Optional[Callable]=None, onProgramFailureHandle: Optional[Callable]=None,
+        onProcessInterruptedHandle: Optional[Callable]=None,
         addSpaceBetweenSteps=False
     ) -> None:
     # NOTE: Even though we're not using the stock 7za.exe anymore, may as well keep the output looking familiar.
@@ -203,7 +204,7 @@ if __name__ == '__main__':
     def onProcessInterruptedHandleExample(message: str) -> None:
         print(f'On process interrupted: {message}')
     
-    # Imitates user interruption
+    # Imitates user interruption (just uncomment, adjust the delay and its good to go!).
     # import threading, time
     # threading.Thread(target=lambda: (time.sleep(0.1), interruptProcessHandle())).start()
 

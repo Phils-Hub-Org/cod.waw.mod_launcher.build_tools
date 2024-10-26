@@ -13,6 +13,7 @@ For console output refer to: 'Misc/building-sounds-info.txt'
 """
 
 import os, subprocess
+from typing import Callable, Optional
 
 stepFailure = False
 processInterrupted = False
@@ -20,8 +21,8 @@ processInterrupted = False
 def build(
         binDir: str,
         outputHandle=print,
-        onProgramSuccessHandle=None, onProgramFailureHandle=None,
-        onProcessInterruptedHandle=None,
+        onProgramSuccessHandle: Optional[Callable]=None, onProgramFailureHandle: Optional[Callable]=None,
+        onProcessInterruptedHandle: Optional[Callable]=None,
         addSpaceBetweenSteps=False
     ) -> None:
     
@@ -113,7 +114,7 @@ if __name__ == '__main__':
     def onProcessInterruptedHandleExample(message: str) -> None:
         print(f'On process interrupted: {message}')
     
-    # Imitates user interruption
+    # Imitates user interruption (just uncomment, adjust the delay and its good to go!).
     # import threading, time
     # threading.Thread(target=lambda: (time.sleep(0.1), interruptProcessHandle())).start()
 
