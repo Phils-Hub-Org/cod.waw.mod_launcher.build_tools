@@ -25,18 +25,17 @@ processInterrupted = False
 
 def build(
         modDir: str, zoneSourceDir: str, modName: str, binDir: str, zoneEnglishDir: str, activisionModDir: str,
-        outputHandle=print, warningOutputHandle: Optional[Callable]=None, errorOutputHandle: Optional[Callable]=None,
-        onProgramSuccessHandle: Optional[Callable]=None, onProgramFailureHandle: Optional[Callable]=None,
-        onProcessInterruptedHandle: Optional[Callable]=None,
-        addSpaceBetweenSteps=False
-    ) -> None:
+        buildOutputHandle=print, buildWarningOutputHandle: Optional[Callable]=None, buildErrorOutputHandle: Optional[Callable]=None,
+        buildSuccessHandle: Optional[Callable]=None, buildFailureHandle: Optional[Callable]=None,
+        buildInterruptedHandle: Optional[Callable]=None,
+        addSpaceBetweenSteps=False) -> None:
     
     steps = [
-        lambda arg1=modDir, arg2=zoneSourceDir, arg3=outputHandle: copyModCsvFromModToZoneSource(arg1, arg2, arg3),
-        lambda arg1=modName, arg2=binDir, arg3=outputHandle, arg4=warningOutputHandle, arg5=errorOutputHandle: buildModFf(arg1, arg2, arg3, arg4, arg5),
-        lambda arg1=zoneEnglishDir, arg2=modDir, arg3=outputHandle: moveModFfFromZoneEnglishToMod(arg1, arg2, arg3),
-        lambda arg1=activisionModDir, arg2=modDir, arg3=outputHandle: copyModFfFromModToActivisionMod(arg1, arg2, arg3),
-        lambda arg1=activisionModDir, arg2=modDir, arg3=modName, arg4=outputHandle: copyIwdFromModToActivisionMod(arg1, arg2, arg3, arg4),
+        lambda arg1=modDir, arg2=zoneSourceDir, arg3=buildOutputHandle: copyModCsvFromModToZoneSource(arg1, arg2, arg3),
+        lambda arg1=modName, arg2=binDir, arg3=buildOutputHandle, arg4=buildWarningOutputHandle, arg5=buildErrorOutputHandle: buildModFf(arg1, arg2, arg3, arg4, arg5),
+        lambda arg1=zoneEnglishDir, arg2=modDir, arg3=buildOutputHandle: moveModFfFromZoneEnglishToMod(arg1, arg2, arg3),
+        lambda arg1=activisionModDir, arg2=modDir, arg3=buildOutputHandle: copyModFfFromModToActivisionMod(arg1, arg2, arg3),
+        lambda arg1=activisionModDir, arg2=modDir, arg3=modName, arg4=buildOutputHandle: copyIwdFromModToActivisionMod(arg1, arg2, arg3, arg4),
     ]
 
     # lambda's are anonymous functions, so we need to assign the function names manually
@@ -57,22 +56,22 @@ def build(
         try:
             step()
             if addSpaceBetweenSteps:
-                outputHandle('\n'.strip())  # it adds 2 newlines w/o .strip()
+                buildOutputHandle('\n'.strip())  # it adds 2 newlines w/o .strip()
         except Exception as error:
             stepFailure = True
-            if onProgramFailureHandle:
-                onProgramFailureHandle(f'Step {step.__name__} failed: {error}')
+            if buildFailureHandle:
+                buildFailureHandle(f'Step {step.__name__} failed: {error}')
     
     if processInterrupted:
-        if onProcessInterruptedHandle:
-            onProcessInterruptedHandle('Process was interrupted by the user')
+        if buildInterruptedHandle:
+            buildInterruptedHandle('Process was interrupted by the user')
         return
 
     if not stepFailure:
-        if onProgramSuccessHandle:
-            onProgramSuccessHandle('Everything is Ok')
+        if buildSuccessHandle:
+            buildSuccessHandle('Everything is Ok')
 
-def copyModCsvFromModToZoneSource(modDir: str, zoneSourceDir: str, outputHandle: Callable) -> None:
+def copyModCsvFromModToZoneSource(modDir: str, zoneSourceDir: str, buildOutputHandle: Callable) -> None:
     mod_csv_path = os.path.join(modDir, 'mod.csv')
 
     # Check if the file exists (this would usually be handled by the mod launcher)
@@ -86,10 +85,10 @@ def copyModCsvFromModToZoneSource(modDir: str, zoneSourceDir: str, outputHandle:
     
     shutil.copy2(mod_csv_path, zone_source_path)
 
-    outputHandle(f'Copying  {mod_csv_path}')
-    outputHandle(f'     to  {zone_source_path}')
+    buildOutputHandle(f'Copying  {mod_csv_path}')
+    buildOutputHandle(f'     to  {zone_source_path}')
 
-def buildModFf(modName: str, binDir: str, outputHandle: Callable, warningOutputHandle: Optional[Callable], errorOutputHandle: Optional[Callable]) -> None:
+def buildModFf(modName: str, binDir: str, buildOutputHandle: Callable, buildWarningOutputHandle: Optional[Callable], buildErrorOutputHandle: Optional[Callable]) -> None:
     args = ['linker_pc', '-nopause', '-language', 'english', '-moddir', modName, 'mod']
 
     # Use Popen to run the linker asynchronously
@@ -109,13 +108,13 @@ def buildModFf(modName: str, binDir: str, outputHandle: Callable, warningOutputH
             break
         if output:
             output = output.strip()
-            outputHandle(output)
+            buildOutputHandle(output)
             if output.startswith('WARNING:'):
-                if warningOutputHandle:
-                    warningOutputHandle(output)
+                if buildWarningOutputHandle:
+                    buildWarningOutputHandle(output)
             elif output.startswith('ERROR:'):
-                if errorOutputHandle:
-                    errorOutputHandle(output)
+                if buildErrorOutputHandle:
+                    buildErrorOutputHandle(output)
     
         if processInterrupted:  # user interrupted
             process.kill()
@@ -124,18 +123,18 @@ def buildModFf(modName: str, binDir: str, outputHandle: Callable, warningOutputH
     # Capture the stderr output after the process finishes
     stderr = process.stderr.read()
     if stderr:
-        outputHandle(stderr.strip())
+        buildOutputHandle(stderr.strip())
 
-def moveModFfFromZoneEnglishToMod(zoneEnglishDir: str, modDir: str, outputHandle: Callable) -> None:
+def moveModFfFromZoneEnglishToMod(zoneEnglishDir: str, modDir: str, buildOutputHandle: Callable) -> None:
     modFfSource = os.path.join(zoneEnglishDir, 'mod.ff')
     modFfDest = os.path.join(modDir, 'mod.ff')
 
     shutil.move(modFfSource, modFfDest)
 
-    outputHandle(f'Moving  {modFfSource}')
-    outputHandle(f'    to  {modFfDest}')
+    buildOutputHandle(f'Moving  {modFfSource}')
+    buildOutputHandle(f'    to  {modFfDest}')
 
-def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, outputHandle: Callable) -> None:
+def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, buildOutputHandle: Callable) -> None:
     if not os.path.exists(activisionModDir):
         os.makedirs(activisionModDir)
 
@@ -144,10 +143,10 @@ def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, outputHa
 
     shutil.copy2(modFfSource, modFfDest)
 
-    outputHandle(f'Copying  {modFfSource}')
-    outputHandle(f'     to  {modFfDest}')
+    buildOutputHandle(f'Copying  {modFfSource}')
+    buildOutputHandle(f'     to  {modFfDest}')
 
-def copyIwdFromModToActivisionMod(activisionModDir: str, modDir: str, modName: str, outputHandle: Callable) -> None:
+def copyIwdFromModToActivisionMod(activisionModDir: str, modDir: str, modName: str, buildOutputHandle: Callable) -> None:
     # Just a nice touch that the stock launcher has where it ensures the modName.iwd is present in appdata/mods folder during the mod.ff stage.
     
     if not os.path.exists(activisionModDir):
@@ -166,16 +165,16 @@ def copyIwdFromModToActivisionMod(activisionModDir: str, modDir: str, modName: s
 
             shutil.copy2(modIwdSource, modIwdDest)
 
-            outputHandle(f'Copying  {modIwdSource}')
-            outputHandle(f'     to  {modIwdDest}')
+            buildOutputHandle(f'Copying  {modIwdSource}')
+            buildOutputHandle(f'     to  {modIwdDest}')
         else:
-            outputHandle(f'Skipping copying  {modIwdSource}')
-            outputHandle(f'              to  {modIwdDest}')
-            outputHandle('          Reason  iwd already present')
+            buildOutputHandle(f'Skipping copying  {modIwdSource}')
+            buildOutputHandle(f'              to  {modIwdDest}')
+            buildOutputHandle('          Reason  iwd already present')
     else:
-        outputHandle(f'Skipping copying  {modIwdSource}')
-        outputHandle(f'              to  {modIwdDest}')
-        outputHandle('          Reason  iwd not present')
+        buildOutputHandle(f'Skipping copying  {modIwdSource}')
+        buildOutputHandle(f'              to  {modIwdDest}')
+        buildOutputHandle('          Reason  iwd not present')
 
 def interruptProcessHandle() -> None:
     global processInterrupted
@@ -190,22 +189,22 @@ if __name__ == '__main__':
     waw_root_dir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
 
     # Feel free to copy/paste these functions into your own script.
-    def outputHandleExample(message: str) -> None:
-        print(message)
+    def buildOutputHandleSlot(message: str) -> None:
+        print(f'Captured output: {message}')
     
-    def warningOutputHandleExample(message: str) -> None:
-        print(f'Captured warning: {message}')
+    def buildWarningOutputHandleSlot(message: str) -> None:
+        print(f'Captured warning from output: {message}')
     
-    def errorOutputHandleExample(message: str) -> None:
-        print(f'Captured error: {message}')
+    def buildErrorOutputHandleSlot(message: str) -> None:
+        print(f'Captured error from output: {message}')
     
-    def onProgramSuccessHandleExample(message: str) -> None:
+    def buildSuccessHandleSlot(message: str) -> None:
         print(f'On program success: {message}')
 
-    def onProgramFailureHandleExample(message: str) -> None:
+    def buildFailureHandleSlot(message: str) -> None:
         print(f'On program failure: {message}')
     
-    def onProcessInterruptedHandleExample(message: str) -> None:
+    def buildInterruptedHandleSlot(message: str) -> None:
         print(f'On process interrupted: {message}')
 
     # Imitates user interruption (just uncomment, adjust the delay and its good to go!).
@@ -214,18 +213,21 @@ if __name__ == '__main__':
 
     print()  # to separate from vs output
     build(
+        ### These are all required args and dont need to be changed ###
         modDir=os.path.join(waw_root_dir, 'mods', mod_name),
         zoneSourceDir=os.path.join(waw_root_dir, 'zone_source'),
         modName=mod_name,
         binDir=os.path.join(waw_root_dir, 'bin'),
         zoneEnglishDir=os.path.join(waw_root_dir, 'zone', 'english'),
-        activisionModDir=os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'Activision', 'CoDWaW', 'mods', mod_name),  # '~' = home dir
-        # outputHandle=outputHandleExample,  # uses print by default
-        # warningOutputHandle=warningOutputHandleExample,  # looks for a specific output marker: 'WARNING:'
-        # errorOutputHandle=errorOutputHandleExample,  # looks for a specific output marker: 'ERROR:'
-        onProgramSuccessHandle=onProgramSuccessHandleExample,
-        onProgramFailureHandle=onProgramFailureHandleExample,
-        onProcessInterruptedHandle=onProcessInterruptedHandleExample,
+        activisionModDir=os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'Activision', 'CoDWaW', 'mods', mod_name),  # '~' = home dir: 'C:\Users\Phil-\'
+
+        ### These are all optional args and can be changed ###
+        # buildOutputHandle=buildOutputHandleSlot,  # uses print by default
+        # buildWarningOutputHandle=buildWarningOutputHandleSlot,  # looks for a specific output marker: 'WARNING:'
+        # buildErrorOutputHandle=buildErrorOutputHandleSlot,  # looks for a specific output marker: 'ERROR:'
+        buildSuccessHandle=buildSuccessHandleSlot,
+        buildFailureHandle=buildFailureHandleSlot,
+        buildInterruptedHandle=buildInterruptedHandleSlot,
         addSpaceBetweenSteps=True
     )
     print()  # to separate from vs output

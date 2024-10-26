@@ -21,10 +21,9 @@ processInterrupted = False
 def build(
         binDir: str,
         outputHandle=print,
-        onProgramSuccessHandle: Optional[Callable]=None, onProgramFailureHandle: Optional[Callable]=None,
-        onProcessInterruptedHandle: Optional[Callable]=None,
-        addSpaceBetweenSteps=False
-    ) -> None:
+        buildSuccessHandle: Optional[Callable]=None, buildFailureHandle: Optional[Callable]=None,
+        buildInterruptedHandle: Optional[Callable]=None,
+        addSpaceBetweenSteps=False) -> None:
     
     steps = [
         lambda arg1=binDir, arg2=outputHandle: buildSounds(arg1, arg2),
@@ -47,17 +46,17 @@ def build(
                 outputHandle('\n'.strip())  # it adds 2 newlines w/o .strip()
         except Exception as error:
             stepFailure = True
-            if onProgramFailureHandle:
-                onProgramFailureHandle(f'Step {step.__name__} failed: {error}')
+            if buildFailureHandle:
+                buildFailureHandle(f'Step {step.__name__} failed: {error}')
     
     if processInterrupted:
-        if onProcessInterruptedHandle:
-            onProcessInterruptedHandle('Process was interrupted by the user')
+        if buildInterruptedHandle:
+            buildInterruptedHandle('Process was interrupted by the user')
         return
 
     if not stepFailure:
-        if onProgramSuccessHandle:
-            onProgramSuccessHandle('Everything is Ok')
+        if buildSuccessHandle:
+            buildSuccessHandle('Everything is Ok')
 
 def buildSounds(binDir: str, outputHandle=print) -> None:
     args = ['MODSound', '-pc', '-ignore_orphans']
@@ -102,16 +101,16 @@ if __name__ == '__main__':
     bin_dir = os.path.join(waw_root_dir, 'bin')
 
     # Feel free to copy/paste these functions into your own script.
-    def outputHandleExample(message: str) -> None:
-        print(message)
+    def buildOutputHandleSlot(message: str) -> None:
+        print(f'Captured output: {message}')
     
-    def onProgramSuccessHandleExample(message: str) -> None:
+    def buildSuccessHandleSlot(message: str) -> None:
         print(f'On program success: {message}')
 
-    def onProgramFailureHandleExample(message: str) -> None:
+    def buildFailureHandleSlot(message: str) -> None:
         print(f'On program failure: {message}')
     
-    def onProcessInterruptedHandleExample(message: str) -> None:
+    def buildInterruptedHandleSlot(message: str) -> None:
         print(f'On process interrupted: {message}')
     
     # Imitates user interruption (just uncomment, adjust the delay and its good to go!).
@@ -120,11 +119,14 @@ if __name__ == '__main__':
 
     print()  # to separate from vs output
     build(
+        ### These are all required args and dont need to be changed ###
         binDir=bin_dir,
+
+        ### These are all optional args and can be changed ###
         # outputHandle=outputHandleExample,  # uses print by default
-        onProgramSuccessHandle=onProgramSuccessHandleExample,
-        onProgramFailureHandle=onProgramFailureHandleExample,
-        onProcessInterruptedHandle=onProcessInterruptedHandleExample,
+        buildSuccessHandle=buildSuccessHandleSlot,
+        buildFailureHandle=buildFailureHandleSlot,
+        buildInterruptedHandle=buildInterruptedHandleSlot,
         addSpaceBetweenSteps=True
     )
     print()  # to separate from vs output
