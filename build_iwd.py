@@ -222,8 +222,9 @@ if __name__ == '__main__':
             'sound',
         ],
         filesToIgnore=[
-            'how-to-notes.md',
-            'screen-grab-of-map.png',
+            # examples
+            # 'how-to-notes.md',
+            # 'screen-grab-of-map.png',
         ],
         extensionsToIgnore=[
             '.ff',
