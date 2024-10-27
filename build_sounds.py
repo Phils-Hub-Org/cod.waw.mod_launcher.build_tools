@@ -20,13 +20,13 @@ processInterrupted = False
 
 def build(
         binDir: str,
-        outputHandle=print,
+        buildOutputHandle=print,
         buildSuccessHandle: Optional[Callable]=None, buildFailureHandle: Optional[Callable]=None,
         buildInterruptedHandle: Optional[Callable]=None,
         addSpaceBetweenSteps=False) -> None:
     
     steps = [
-        lambda arg1=binDir, arg2=outputHandle: buildSounds(arg1, arg2),
+        lambda arg1=binDir, arg2=buildOutputHandle: buildSounds(arg1, arg2),
     ]
 
     # lambda's are anonymous functions, so we need to assign the function names manually
@@ -43,7 +43,7 @@ def build(
         try:
             step()
             if addSpaceBetweenSteps:
-                outputHandle('\n'.strip())  # it adds 2 newlines w/o .strip()
+                buildOutputHandle('\n'.strip())  # it adds 2 newlines w/o .strip()
         except Exception as error:
             stepFailure = True
             if buildFailureHandle:
@@ -55,10 +55,11 @@ def build(
         return
 
     if not stepFailure:
+        buildOutputHandle('Everything is Ok')
         if buildSuccessHandle:
-            buildSuccessHandle('Everything is Ok')
+            buildSuccessHandle('All steps completed successfully')
 
-def buildSounds(binDir: str, outputHandle=print) -> None:
+def buildSounds(binDir: str, buildOutputHandle=print) -> None:
     args = ['MODSound', '-pc', '-ignore_orphans']
     
     # Use Popen to run the linker asynchronously
@@ -77,7 +78,7 @@ def buildSounds(binDir: str, outputHandle=print) -> None:
         if output == '' and process.poll() is not None:
             break
         if output:
-            outputHandle(output.strip())
+            buildOutputHandle(output.strip())
     
         if processInterrupted:  # user interrupted
             process.kill()
@@ -86,7 +87,7 @@ def buildSounds(binDir: str, outputHandle=print) -> None:
     # Capture the stderr output after the process finishes
     stderr = process.stderr.read()
     if stderr:
-        outputHandle(stderr.strip())
+        buildOutputHandle(stderr.strip())
 
 def interruptProcessHandle() -> None:
     global processInterrupted
@@ -123,7 +124,7 @@ if __name__ == '__main__':
         binDir=bin_dir,
 
         ### These are all optional args and can be changed ###
-        # outputHandle=buildSoundOutputHandleSlot,  # uses print by default
+        # buildOutputHandle=buildSoundOutputHandleSlot,  # uses print by default
         buildSuccessHandle=buildSoundSuccessHandleSlot,
         buildFailureHandle=buildSoundFailureHandleSlot,
         buildInterruptedHandle=buildSoundInterruptedHandleSlot,
