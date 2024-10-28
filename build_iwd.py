@@ -10,9 +10,11 @@
 For console output refer to: 'Misc/building-iwd-info.txt'
 """
 
-import os, shutil, zipfile, platform
+import os, shutil, zipfile, logging, platform
 from datetime import datetime
 from typing import Callable, Optional
+
+logger = logging.getLogger(__name__)
 
 stepFailure = False
 processInterrupted = False
@@ -20,10 +22,11 @@ processInterrupted = False
 def build(
         modName: str, modDir: str, activisionModDir: str,
         foldersToIgnore: list=[], filesToIgnore: list=[], extensionsToIgnore: list=[],
-        buildOutputHandle=print,
+        buildOutputHandle: Callable=print,
         buildSuccessHandle: Optional[Callable]=None, buildFailureHandle: Optional[Callable]=None,
         buildInterruptedHandle: Optional[Callable]=None,
-        addSpaceBetweenSteps=False) -> None:
+        addSpaceBetweenSteps=False, msgGroupSize: int=1
+    ) -> None:
 
     buildOutputHandle(f'Python zipfile (P) {platform.python_version()}')
     buildOutputHandle(f'Copyright (c) 2001-{datetime.now().year} Python Software Foundation')
@@ -32,7 +35,7 @@ def build(
     buildOutputHandle(f'{x}Creating archive {os.path.join(modDir, f'{modName}.iwd')}{x}')
 
     steps = [
-        lambda arg1=modDir, arg2=modName, arg3=foldersToIgnore, arg4=filesToIgnore, arg5=extensionsToIgnore, arg6=buildOutputHandle: buildIwd(arg1, arg2, arg3, arg4, arg5, arg6),
+        lambda arg1=modDir, arg2=modName, arg3=foldersToIgnore, arg4=filesToIgnore, arg5=extensionsToIgnore, arg6=buildOutputHandle, arg7=msgGroupSize: buildIwd(arg1, arg2, arg3, arg4, arg5, arg6, arg7),
         lambda arg1=modName, arg2=modDir, arg3=activisionModDir, arg4=buildOutputHandle: copyModIwdFromModToActivisionMod(arg1, arg2, arg3, arg4),
         lambda arg1=activisionModDir, arg2=modDir, arg3=buildOutputHandle: copyModFfFromModToActivisionMod(arg1, arg2, arg3),
     ]
@@ -45,13 +48,19 @@ def build(
 
     global stepFailure
 
-    for step in steps:
+    # import time
+
+    for i, step in enumerate(steps):
         if stepFailure:
             break
         if processInterrupted:
             break
         try:
-            step()
+            # start_time = time.time()  # Record the start time
+            step()                    # Call the step function
+            # elapsed_time = time.time() - start_time  # Calculate elapsed time
+            # logger.debug(f"[iwd]: Time taken for step {i}: {elapsed_time:.4f} seconds")
+
             if addSpaceBetweenSteps:
                 buildOutputHandle('\n'.strip())  # it adds 2 newlines w/o .strip()
         except Exception as error:
@@ -69,8 +78,12 @@ def build(
         if buildSuccessHandle:
             buildSuccessHandle('All steps completed successfully')
 
-def buildIwd(modDir: str, modName: str, foldersToIgnore: list, filesToIgnore: list, extensionsToIgnore:list, buildOutputHandle=print) -> None:
-    # Anything to be built into the modname.iwd will need its full mod dir path (exluding leading up to mod root).
+def buildIwd(
+        modDir: str, modName: str,
+        foldersToIgnore: list, filesToIgnore: list, extensionsToIgnore: list,
+        buildOutputHandle: Callable, msgGroupSize: int
+    ) -> None:
+
     array = []
 
     itemsToPkgIntoIwd = grabModStructure(
@@ -84,33 +97,41 @@ def buildIwd(modDir: str, modName: str, foldersToIgnore: list, filesToIgnore: li
 
     iwdDest = os.path.join(modDir, f'{modName}.iwd')
 
-    # delete old iwd if it exists
+    # Delete old iwd if it exists
     if os.path.exists(iwdDest):
         os.remove(iwdDest)
 
-    array = sorted(array)  # sort in ascending order
+    array = sorted(array)  # Sort in ascending order
+
+    # Grouping messages for appending to console in blocks
+    message_buffer = []
 
     for item in array:
-        # Add the file (item) to the zip archive
-        with zipfile.ZipFile(iwdDest, 'a', zipfile.ZIP_DEFLATED) as zipf:  # 'a' for append, just be sure to delete old iwd first
-            # Specify files and where you want them in the .iwd archive
-            # For example, placing a specific file in the 'aitype' folder inside the iwd
-            
-            # Full path to the source file on the disk
-            file_to_add = os.path.join(modDir, item).replace('\\', '/')
-            # file_to_add = 'D:/SteamLibrary/steamapps/common/Call of Duty World at War/mods/zm_tst1/aitype/axis_zombie_ger_ber_sshonor.gsc'
-            
-            # Specify the destination path inside the iwd archive (as if you're recreating the folder structure)
-            file_in_iwd = item
-            # file_in_iwd = 'aitype/axis_zombie_ger_ber_sshonor.gsc'
+        # Prepare the message for the current file being processed
+        message_buffer.append(f'Compressing {item}')
 
-            buildOutputHandle(f'Compressing  {item}')
-            
+        # Check if the buffer has reached the specified group size
+        if len(message_buffer) >= msgGroupSize:
+            # Join messages and send them
+            grouped_messages = "\n".join(message_buffer)
+            buildOutputHandle(grouped_messages)
+            message_buffer.clear()  # Clear the buffer after sending
+
+        # Add the file (item) to the zip archive
+        with zipfile.ZipFile(iwdDest, 'a', zipfile.ZIP_DEFLATED) as zipf:
+            file_to_add = os.path.join(modDir, item).replace('\\', '/')
+            file_in_iwd = item
+
             # Add the file to the zip archive
             zipf.write(file_to_add, file_in_iwd)
 
         if processInterrupted:
             break
+
+    # After the loop, flush any remaining messages in the buffer
+    if message_buffer:
+        grouped_messages = "\n".join(message_buffer)
+        buildOutputHandle(grouped_messages)
 
 # Utilized by: buildIwd()
 def grabModStructure(rootDir: str=os.getcwd(), foldersToIgnore: list=[], filesToIgnore: list=[], extensionsToIgnore: list=[]) -> dict:
@@ -238,6 +259,7 @@ if __name__ == '__main__':
         buildSuccessHandle=buildIWDSuccessHandleSlot,
         buildFailureHandle=buildIWDFailureHandleSlot,
         buildInterruptedHandle=buildIWDInterruptedHandleSlot,
-        addSpaceBetweenSteps=True
+        addSpaceBetweenSteps=True,
+        # msgGroupSize=10
     )
     print()  # to separate from vs output

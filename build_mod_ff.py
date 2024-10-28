@@ -17,22 +17,27 @@
 For console output refer to: 'Misc/building-mod.ff-output.txt'    
 """
 
-import os, csv, shutil, subprocess
+import os, csv, shutil, logging, subprocess
 from typing import Callable, Optional
+
+logger = logging.getLogger(__name__)
 
 stepFailure = False
 processInterrupted = False
 
 def build(
         modDir: str, zoneSourceDir: str, modName: str, binDir: str, zoneEnglishDir: str, activisionModDir: str,
-        buildOutputHandle=print, buildWarningOutputHandle: Optional[Callable]=None, buildErrorOutputHandle: Optional[Callable]=None,
+        buildOutputHandle=print,
+        buildWarningOutputHandle: Optional[Callable]=None, buildErrorOutputHandle: Optional[Callable]=None,
         buildSuccessHandle: Optional[Callable]=None, buildFailureHandle: Optional[Callable]=None,
         buildInterruptedHandle: Optional[Callable]=None,
-        addSpaceBetweenSteps=False) -> None:
+        addSpaceBetweenSteps=False,
+        msgGroupSize: int=1
+    ) -> None:
     
     steps = [
         lambda arg1=modDir, arg2=zoneSourceDir, arg3=buildOutputHandle: copyModCsvFromModToZoneSource(arg1, arg2, arg3),
-        lambda arg1=modName, arg2=binDir, arg3=buildOutputHandle, arg4=buildWarningOutputHandle, arg5=buildErrorOutputHandle: buildModFf(arg1, arg2, arg3, arg4, arg5),
+        lambda arg1=modName, arg2=binDir, arg3=buildOutputHandle, arg4=buildWarningOutputHandle, arg5=buildErrorOutputHandle, arg6=msgGroupSize: buildModFf(arg1, arg2, arg3, arg4, arg5, arg6),
         lambda arg1=zoneEnglishDir, arg2=modDir, arg3=buildOutputHandle: moveModFfFromZoneEnglishToMod(arg1, arg2, arg3),
         lambda arg1=activisionModDir, arg2=modDir, arg3=buildOutputHandle: copyModFfFromModToActivisionMod(arg1, arg2, arg3),
         lambda arg1=activisionModDir, arg2=modDir, arg3=modName, arg4=buildOutputHandle: copyIwdFromModToActivisionMod(arg1, arg2, arg3, arg4),
@@ -48,13 +53,19 @@ def build(
 
     global stepFailure
 
+    # import time
+
     for step in steps:
         if stepFailure:
             break
         if processInterrupted:
             break
         try:
-            step()
+            # start_time = time.time()  # Record the start time
+            step()                    # Call the step function
+            # elapsed_time = time.time() - start_time  # Calculate elapsed time
+            # logger.debug(f"[modff]: Time taken for step {i}: {elapsed_time:.4f} seconds")
+
             if addSpaceBetweenSteps:
                 buildOutputHandle('\n'.strip())  # it adds 2 newlines w/o .strip()
         except Exception as error:
@@ -89,7 +100,14 @@ def copyModCsvFromModToZoneSource(modDir: str, zoneSourceDir: str, buildOutputHa
     buildOutputHandle(f'Copying  {mod_csv_path}')
     buildOutputHandle(f'     to  {zone_source_path}')
 
-def buildModFf(modName: str, binDir: str, buildOutputHandle: Callable, buildWarningOutputHandle: Optional[Callable], buildErrorOutputHandle: Optional[Callable]) -> None:
+def buildModFf(
+    modName: str,
+    binDir: str,
+    buildOutputHandle: Callable,
+    buildWarningOutputHandle: Optional[Callable],
+    buildErrorOutputHandle: Optional[Callable],
+    msgGroupSize: int
+) -> None:
     args = ['linker_pc', '-nopause', '-language', 'english', '-moddir', modName, 'mod']
 
     # Use Popen to run the linker asynchronously
@@ -102,6 +120,9 @@ def buildModFf(modName: str, binDir: str, buildOutputHandle: Callable, buildWarn
         text=True  # Enable text mode for easier string handling
     )
 
+    # Buffer for messages
+    message_buffer = []
+
     # Read stdout and stderr in real time
     while True:
         output = process.stdout.readline()
@@ -109,17 +130,31 @@ def buildModFf(modName: str, binDir: str, buildOutputHandle: Callable, buildWarn
             break
         if output:
             output = output.strip()
-            buildOutputHandle(output)
+            message_buffer.append(output)  # Add the output to the buffer
+
+            # Check if the buffer has reached the specified group size
+            if len(message_buffer) >= msgGroupSize:
+                # Join messages and send them
+                grouped_messages = "\n".join(message_buffer)
+                buildOutputHandle(grouped_messages)
+                message_buffer.clear()  # Clear the buffer after sending
+
+            # Handle warnings and errors
             if output.startswith('WARNING:'):
                 if buildWarningOutputHandle:
                     buildWarningOutputHandle(output)
             elif output.startswith('ERROR:'):
                 if buildErrorOutputHandle:
                     buildErrorOutputHandle(output)
-    
+
         if processInterrupted:  # user interrupted
             process.kill()
             return
+
+    # After the process finishes, flush any remaining messages in the buffer
+    if message_buffer:
+        grouped_messages = "\n".join(message_buffer)
+        buildOutputHandle(grouped_messages)
 
     # Capture the stderr output after the process finishes
     stderr = process.stderr.read()
@@ -229,6 +264,7 @@ if __name__ == '__main__':
         buildSuccessHandle=buildModFFSuccessHandleSlot,
         buildFailureHandle=buildModFFFailureHandleSlot,
         buildInterruptedHandle=buildModFFInterruptedHandleSlot,
-        addSpaceBetweenSteps=True
+        addSpaceBetweenSteps=True,
+        # msgGroupSize=10
     )
     print()  # to separate from vs output
