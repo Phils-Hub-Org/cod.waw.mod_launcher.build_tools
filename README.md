@@ -9,7 +9,7 @@ Build Features:
 
 ## Installation
 
-Download/clone the latest version and either run the module directly within vscode for example or drop the module into your own python project.
+Download/clone the latest version and either run the module directly within vscode for example or drop the module into your own python project and connect it up.
 
 ## Usage
 
