@@ -2,7 +2,7 @@
 
 3 modular components that do the same as the 3 stock waw mod launcher operations do on the 'Mod Builder' tab
 
-Build Features:
+## Features
 - mod.ff
 - .iwd
 - custom sounds
