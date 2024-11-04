@@ -17,10 +17,8 @@
 For console output refer to: 'Misc/building-mod.ff-output.txt'    
 """
 
-import os, csv, shutil, logging, subprocess
+import os, csv, shutil, subprocess
 from typing import Callable, Optional
-
-logger = logging.getLogger(__name__)
 
 stepFailure = False
 processInterrupted = False
@@ -53,18 +51,15 @@ def build(
 
     global stepFailure
 
-    # import time
-
     for step in steps:
+
         if stepFailure:
             break
         if processInterrupted:
             break
+
         try:
-            # start_time = time.time()  # Record the start time
-            step()                    # Call the step function
-            # elapsed_time = time.time() - start_time  # Calculate elapsed time
-            # logger.debug(f"[modff]: Time taken for step {i}: {elapsed_time:.4f} seconds")
+            step()
 
             if addSpaceBetweenSteps:
                 buildOutputHandle('\n'.strip())  # it adds 2 newlines w/o .strip()
@@ -183,34 +178,34 @@ def copyModFfFromModToActivisionMod(activisionModDir: str, modDir: str, buildOut
     buildOutputHandle(f'     to  {modFfDest}')
 
 def copyIwdFromModToActivisionMod(activisionModDir: str, modDir: str, modName: str, buildOutputHandle: Callable) -> None:
-    # Just a nice touch that the stock launcher has where it ensures the modName.iwd is present in appdata/mods folder during the mod.ff stage.
+    # Just a nice touch that the stock launcher has where it ensures the modName.iwd is present in appdata/mods folder during the mod.ff build stage.
     
     if not os.path.exists(activisionModDir):
-        os.makedirs(activisionModDir)
+        os.makedirs(activisionModDir, exist_ok=True)
 
     modIwdSource = os.path.join(modDir, f'{modName}.iwd')
     modIwdDest = os.path.join(activisionModDir, f'{modName}.iwd')
     
-    # step 1: check if present in root/mods
-    if os.path.exists(modIwdSource):
-        # print('iwd present in root/mods')
-
-        # step 2: check if not present in appdata/mods
-        if not os.path.exists(modIwdDest):
-            # print('iwd not in appdata/mods')
-
-            shutil.copy2(modIwdSource, modIwdDest)
-
-            buildOutputHandle(f'Copying  {modIwdSource}')
-            buildOutputHandle(f'     to  {modIwdDest}')
-        else:
-            buildOutputHandle(f'Skipping copying  {modIwdSource}')
-            buildOutputHandle(f'              to  {modIwdDest}')
-            buildOutputHandle('          Reason  iwd already present')
-    else:
+    # check if not present in root/mods
+    if not os.path.exists(modIwdSource):
+        # print('iwd not present in root/mods')
         buildOutputHandle(f'Skipping copying  {modIwdSource}')
         buildOutputHandle(f'              to  {modIwdDest}')
         buildOutputHandle('          Reason  iwd not present')
+        return
+
+    # check if present in appdata/mods
+    if os.path.exists(modIwdDest):
+        # print('iwd in appdata/mods')
+        buildOutputHandle(f'Skipping copying  {modIwdSource}')
+        buildOutputHandle(f'              to  {modIwdDest}')
+        buildOutputHandle('          Reason  iwd already present')
+        return
+
+    shutil.copy2(modIwdSource, modIwdDest)
+
+    buildOutputHandle(f'Copying  {modIwdSource}')
+    buildOutputHandle(f'     to  {modIwdDest}')
 
 def interruptProcessHandle() -> None:
     global processInterrupted
