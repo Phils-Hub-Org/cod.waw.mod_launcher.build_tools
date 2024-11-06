@@ -55,8 +55,11 @@ def build(
 
         if stepFailure:
             break
+
         if processInterrupted:
-            break
+            if buildInterruptedHandle:
+                buildInterruptedHandle('Process was interrupted by the user')
+            return
 
         try:
             step()
@@ -67,11 +70,6 @@ def build(
             stepFailure = True
             if buildFailureHandle:
                 buildFailureHandle(f'Step {step.__name__} failed: {error}')
-    
-    if processInterrupted:
-        if buildInterruptedHandle:
-            buildInterruptedHandle('Process was interrupted by the user')
-        return
 
     if not stepFailure:
         buildOutputHandle('Everything is Ok')

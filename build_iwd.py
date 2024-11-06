@@ -48,18 +48,18 @@ def build(
 
     global stepFailure
 
-    # import time
+    for step in steps:
 
-    for i, step in enumerate(steps):
         if stepFailure:
             break
+
         if processInterrupted:
-            break
+            if buildInterruptedHandle:
+                buildInterruptedHandle('Process was interrupted by the user')
+            return
+
         try:
-            # start_time = time.time()  # Record the start time
-            step()                    # Call the step function
-            # elapsed_time = time.time() - start_time  # Calculate elapsed time
-            # logger.debug(f"[iwd]: Time taken for step {i}: {elapsed_time:.4f} seconds")
+            step()
 
             if addSpaceBetweenSteps:
                 buildOutputHandle('\n'.strip())  # it adds 2 newlines w/o .strip()
@@ -67,11 +67,6 @@ def build(
             stepFailure = True
             if buildFailureHandle:
                 buildFailureHandle(f'Step {step.__name__} failed: {error}')
-    
-    if processInterrupted:
-        if buildInterruptedHandle:
-            buildInterruptedHandle('Process was interrupted by the user')
-        return
 
     if not stepFailure:
         buildOutputHandle('Everything is Ok')
@@ -228,8 +223,8 @@ if __name__ == '__main__':
         print(f'On process interrupted: {message}')
     
     # Imitates user interruption (just uncomment, adjust the delay and its good to go!).
-    # import threading, time
-    # threading.Thread(target=lambda: (time.sleep(0.1), interruptProcessHandle())).start()
+    import threading, time
+    threading.Thread(target=lambda: (time.sleep(0.1), interruptProcessHandle())).start()
 
     print()  # to separate from vs output
     build(
