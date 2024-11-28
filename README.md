@@ -44,16 +44,16 @@ This is a Phils-Hub community-contributed project.
 
 - Build mod.ff output example
 
-![alt text](image.png)
+![alt text](screen_shots/build-mod.ff.png)
 
 - Build .iwd output example
 
-![alt text](image-1.png)
+![alt text](screen_shots/build-iwd.png)
 
 - Build sounds output example
 
-![alt text](image-3.png)
-![alt text](image-2.png)
+![alt text](screen_shots/build-sounds-failure.png)
+![alt text](screen_shots/build-sounds-success.png)
 
 ## Showcase Video
 
