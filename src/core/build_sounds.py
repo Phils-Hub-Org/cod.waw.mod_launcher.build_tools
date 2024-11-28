@@ -1,15 +1,15 @@
 """ NOTE
-(1):
-    When building sounds, it requires you to have a soundalias.csv file setup, i've provided a template file of which you just need to change the path.
-    After the sound has successfully compiled, you can scrap the soundalias.csv file if you wish.
-    p.s, Adding 'sound,custom_sound,,all_sp' to mod.csv section in the mod launcher is not required to build sounds, ..to play them in-game yes, but not build them.
+    (1):
+        When building sounds, it requires you to have a soundalias.csv file setup, i've provided a template file of which you just need to change the path.
+        After the sound has successfully compiled, you can scrap the soundalias.csv file if you wish.
+        p.s, Adding 'sound,custom_sound,,all_sp' to mod.csv section in the mod launcher is not required to build sounds, ..to play them in-game yes, but not build them.
 
-    For more information refer to: 'Misc/building-sounds-info.txt'
+        For more information refer to: 'misc/building-sounds-info.txt'
 
-(2):
-    When testing, you will need to replace the below 'wawRootDir' with your actual WAW root directory.
+    (2):
+        When testing, you will need to replace the below 'wawRootDir' with your actual WAW root directory.
 
-For console output refer to: 'Misc/building-sounds-info.txt'
+    For console output refer to the screen_shots directory.
 """
 
 import os, subprocess

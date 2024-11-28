@@ -1,20 +1,20 @@
 """ NOTE
-(1):
-    When testing, you will need to replace the below 'wawRootDir' with your actual WAW root directory
-    as well as the 'modName' with the actual name of your mod.
+    (1):
+        When testing, you will need to replace the below 'wawRootDir' with your actual WAW root directory
+        as well as the 'modName' with the actual name of your mod.
 
-(2):
-    The default stock mod launcher behaviour is to copy modName.iwd to appdata/mods folder if it is not present there during the mod.ff stage.
-    So this module does take care of that, but for the actual building of the .iwd, check out the 'build_iwd.py' module.
+    (2):
+        The default stock mod launcher behaviour is to copy modName.iwd to appdata/mods folder if it is not present there during the mod.ff stage.
+        So this module does take care of that, but for the actual building of the .iwd, check out the 'build_iwd.py' module.
 
-(3):
-    During the copy mod.csv from mod folder to zone_source folder stage, if said mod.csv file does not exist, it will be created.
+    (3):
+        During the copy mod.csv from mod folder to zone_source folder stage, if said mod.csv file does not exist, it will be created.
 
-(4):
-    When using this in a GUI application, you will need to grab the text from your mod.csv widget section and paste it into the mod.csv file before copying it from mods > zone_source.
-    I've added the logic to copy content from mod.csv in mod folder to zone_source folder. So all you need to do for a GUI-based application is copy text from mod.csv widget-section to mod.csv file in mod folder then this module can take care of the rest.    
+    (4):
+        When using this in a GUI application, you will need to grab the text from your mod.csv widget section and paste it into the mod.csv file before copying it from mods > zone_source.
+        I've added the logic to copy content from mod.csv in mod folder to zone_source folder. So all you need to do for a GUI-based application is copy text from mod.csv widget-section to mod.csv file in mod folder then this module can take care of the rest.    
 
-For console output refer to: 'Misc/building-mod.ff-output.txt'    
+    For console output refer to the screen_shots directory.   
 """
 
 import os, csv, shutil, subprocess
@@ -30,8 +30,7 @@ def build(
         buildSuccessHandle: Optional[Callable]=None, buildFailureHandle: Optional[Callable]=None,
         buildInterruptedHandle: Optional[Callable]=None,
         addSpaceBetweenSteps=False,
-        msgGroupSize: int=1
-    ) -> None:
+        msgGroupSize: int=1) -> None:
     
     steps = [
         lambda arg1=modDir, arg2=zoneSourceDir, arg3=buildOutputHandle: copyModCsvFromModToZoneSource(arg1, arg2, arg3),
@@ -99,8 +98,8 @@ def buildModFf(
     buildOutputHandle: Callable,
     buildWarningOutputHandle: Optional[Callable],
     buildErrorOutputHandle: Optional[Callable],
-    msgGroupSize: int
-) -> None:
+    msgGroupSize: int) -> None:
+
     args = ['linker_pc', '-nopause', '-language', 'english', '-moddir', modName, 'mod']
 
     # Use Popen to run the linker asynchronously

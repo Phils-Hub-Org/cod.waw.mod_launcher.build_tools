@@ -1,0 +1,62 @@
+{
+    'aitype': {
+        'axis_zombie_ger_ber_sshonor.gsc': None
+    },
+    'character': {
+        'char_ger_honorguard2_zombies.gsc': None,
+        'char_ger_honorguard_zombies.gsc': None
+    },
+    'clientscripts': {
+        'createfx': {
+            'nazi_zombie_prototype_fx.csc': None
+            },
+            'nazi_zombie_prototype.csc': None,
+            'nazi_zombie_prototype_amb.csc': None,
+            'nazi_zombie_prototype_fx.csc': None
+    },
+    'maps': {
+        'createart': {
+            'nazi_zombie_prototype_art.gsc': None
+            },
+        'createfx': {
+            'nazi_zombie_prototype_fx.gsc': None
+            },
+        'nazi_zombie_prototype.gsc': None,
+        'nazi_zombie_prototype_fx.gsc': None,
+        '_destructible_opel_blitz.gsc': None,
+        '_zombiemode.gsc': None,
+        '_zombiemode_blockers.gsc': None,
+        '_zombiemode_powerups.gsc': None,
+        '_zombiemode_radio.gsc': None,
+        '_zombiemode_score.gsc': None,
+        '_zombiemode_spawner.gsc': None,
+        '_zombiemode_utility.gsc': None,
+        '_zombiemode_weapons.gsc': None
+    },
+    'mod.csv': None,
+    'mod.ff': None,
+    'rumble': {
+        'flamethrower': None,
+        'flamethrower_h.rmb': None,
+        'flamethrower_l.rmb': None
+    },
+    'xmodelalias': {
+        'char_ger_hnrgrd_body1_2_g_larmoffalias.gsc': None,
+        'char_ger_hnrgrd_body1_2_g_legsoffalias.gsc': None,
+        'char_ger_hnrgrd_body1_2_g_llegoffalias.gsc': None,
+        'char_ger_hnrgrd_body1_2_g_rarmoffalias.gsc': None,
+        'char_ger_hnrgrd_body1_2_g_rlegoffalias.gsc': None,
+        'char_ger_hnrgrd_body1_2_g_torsoalias.gsc': None,
+        'char_ger_hnrgrd_body1_g_larmoffalias.gsc': None,
+        'char_ger_hnrgrd_body1_g_legsoffalias.gsc': None,
+        'char_ger_hnrgrd_body1_g_llegoffalias.gsc': None,
+        'char_ger_hnrgrd_body1_g_rarmoffalias.gsc': None,
+        'char_ger_hnrgrd_body1_g_rlegoffalias.gsc': None,
+        'char_ger_hnrgrd_body1_g_torsoalias.gsc': None,
+        'char_ger_honorgd2_bodyalias.gsc': None,
+        'char_ger_honorgd_bodyalias.gsc': None,
+        'char_ger_honorgd_zombieheadalias.gsc': None
+    },
+    'zm_tst1.files': None,
+    'zm_tst1.iwd': None
+}

@@ -1,0 +1,12 @@
+Major (X.0.0):
+
+Incremented for significant changes, such as backward-incompatible changes or major feature additions.
+Example: Moving from v1.0.0 to v2.0.0 would indicate breaking changes.
+Minor (0.Y.0):
+
+Incremented for new features that are backward-compatible.
+Example: Moving from v1.0.0 to v1.1.0 indicates the addition of new features without breaking existing functionality.
+Patch (0.0.Z):
+
+Incremented for backward-compatible bug fixes or small changes that do not add features.
+Example: Moving from v1.0.0 to v1.0.1 indicates that a bug was fixed without adding new features or breaking existing ones.

@@ -1,13 +1,13 @@
 """ NOTE
-(1):
-    When testing, you will need to replace the below 'wawRootDir' with your actual WAW root directory
-    as well as the 'modName' with the actual name of your mod.
+    (1):
+        When testing, you will need to replace the below 'wawRootDir' with your actual WAW root directory
+        as well as the 'modName' with the actual name of your mod.
 
-(2):
-    The default stock mod launcher behaviour is to copy mod.ff to appdata/mods folder if it is not present there during the iwd stage.
-    So this module does take care of that, but for the actual building of the mod.ff, check out the 'build_mod_ff.py' module.
+    (2):
+        The default stock mod launcher behaviour is to copy mod.ff to appdata/mods folder if it is not present there during the iwd stage.
+        So this module does take care of that, but for the actual building of the mod.ff, check out the 'build_mod_ff.py' module.
 
-For console output refer to: 'Misc/building-iwd-info.txt'
+    For console output refer to the screen_shots directory.
 """
 
 import os, shutil, zipfile, logging, platform
@@ -25,8 +25,7 @@ def build(
         buildOutputHandle: Callable=print,
         buildSuccessHandle: Optional[Callable]=None, buildFailureHandle: Optional[Callable]=None,
         buildInterruptedHandle: Optional[Callable]=None,
-        addSpaceBetweenSteps=False, msgGroupSize: int=1
-    ) -> None:
+        addSpaceBetweenSteps=False, msgGroupSize: int=1) -> None:
 
     buildOutputHandle(f'Python zipfile (P) {platform.python_version()}')
     buildOutputHandle(f'Copyright (c) 2001-{datetime.now().year} Python Software Foundation')
@@ -76,8 +75,7 @@ def build(
 def buildIwd(
         modDir: str, modName: str,
         foldersToIgnore: list, filesToIgnore: list, extensionsToIgnore: list,
-        buildOutputHandle: Callable, msgGroupSize: int
-    ) -> None:
+        buildOutputHandle: Callable, msgGroupSize: int) -> None:
 
     array = []
 
